@@ -9,19 +9,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Debug environment
-        run: |
-          echo "=== Node.js version ==="
-          node --version || echo "node not found"
-          echo "=== npm version ==="
-          npm --version || echo "npm not found"
-          echo "=== Flutter version ==="
-          flutter --version
-          echo "=== macOS version ==="
-          sw_vers
-          echo "=== Xcode version ==="
-          xcodebuild -version
-
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -38,22 +25,19 @@ jobs:
           flutter pub get
           flutter pub upgrade
 
-      - name: Install pods
+      - name: Install CocoaPods
         run: |
-          cd app
-          cd ios
+          cd app/ios
+          sudo gem install cocoapods
+          pod repo update
           pod install --repo-update
 
       - name: Build IPA
         run: |
           cd app
-          flutter build ios --release --no-codesign --verbose
+          flutter build ios --release --no-codesign
         timeout-minutes: 30
 
-      - name: Verify IPA
-        run: |
-          ls -la app/build/ios/iphoneos/
-          
       - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
