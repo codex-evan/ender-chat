@@ -1,0 +1,15 @@
+﻿{
+  "name": "@encrypted-chat/shared-crypto",
+  "version": "1.0.0",
+  "description": "Shared end-to-end encryption library for anonymous encrypted chat",
+  "main": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"No tests configured\""
+  },
+  "dependencies": {
+    "tweetnacl": "^1.0.3",
+    "tweetnacl-util": "^0.15.1"
+  },
+  "devDependencies": {}
+}

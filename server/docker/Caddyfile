@@ -1,0 +1,38 @@
+﻿# Caddy reverse proxy configuration
+{
+  auto_https off
+}
+
+your-domain.com {
+  reverse_proxy chat-server:3000
+  
+  # Enforce HTTPS in production
+  # rewrite /.well-known/acme-challenge/* /
+  # tls {
+  #   protocols tls1.2 tls1.3
+  # }
+  
+  # Security headers
+  header {
+    -Server
+    Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    X-Content-Type-Options "nosniff"
+    X-Frame-Options "DENY"
+    Content-Security-Policy "default-src 'none'"
+  }
+  
+  # Rate limiting
+  @rate limit req_rate 100/minute burst=200
+  handle_response @rate {
+    body "Rate limit exceeded"
+    status 429
+  }
+  
+  # Logging
+  log {
+    output file /var/log/caddy/access.log {
+      roll_size 100MiB
+      roll_keep 5
+    }
+  }
+}

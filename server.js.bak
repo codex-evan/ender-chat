@@ -1,0 +1,145 @@
+const http = require("node:http");
+const fs = require("node:fs");
+const path = require("node:path");
+const crypto = require("node:crypto");
+
+const PORT = Number(process.env.PORT) || 4173;
+const HOST = process.env.HOST || "127.0.0.1";
+const root = __dirname;
+const clients = new Map();
+
+const files = {
+  "/": ["index.html", "text/html; charset=utf-8"],
+  "/index.html": ["index.html", "text/html; charset=utf-8"],
+  "/styles.css": ["styles.css", "text/css; charset=utf-8"],
+  "/app.js": ["app.js", "text/javascript; charset=utf-8"],
+};
+
+function safeId(value, max = 96) {
+  return typeof value === "string" && /^[a-zA-Z0-9_-]+$/.test(value) && value.length <= max;
+}
+
+function roomClients(room) {
+  if (!clients.has(room)) clients.set(room, new Map());
+  return clients.get(room);
+}
+
+function sendSse(res, event, data) {
+  if (res.writableEnded) return;
+  res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+}
+
+function broadcast(room, exceptPeer, event, data) {
+  for (const [peer, res] of roomClients(room)) {
+    if (peer !== exceptPeer) sendSse(res, event, data);
+  }
+}
+
+function json(res, status, body) {
+  res.writeHead(status, { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" });
+  res.end(JSON.stringify(body));
+}
+
+const server = http.createServer((req, res) => {
+  const url = new URL(req.url, `http://${req.headers.host || "localhost"}`);
+
+  if (req.method === "GET" && files[url.pathname]) {
+    const [file, type] = files[url.pathname];
+    fs.readFile(path.join(root, file), (error, data) => {
+      if (error) return json(res, 500, { error: "Unable to read application file." });
+      res.writeHead(200, {
+        "Content-Type": type,
+        "Cache-Control": file === "index.html" ? "no-store" : "public, max-age=300",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "no-referrer",
+        "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+      });
+      res.end(data);
+    });
+    return;
+  }
+
+  if (req.method === "GET" && url.pathname === "/events") {
+    const room = url.searchParams.get("room");
+    const peer = url.searchParams.get("peer");
+    if (!safeId(room) || !safeId(peer)) return json(res, 400, { error: "Invalid room or peer." });
+
+    const members = roomClients(room);
+    if (!members.has(peer) && members.size >= 2) {
+      res.writeHead(200, {
+        "Content-Type": "text/event-stream; charset=utf-8",
+        "Cache-Control": "no-cache, no-transform",
+        Connection: "keep-alive",
+      });
+      sendSse(res, "room-full", { message: "This room already has two people." });
+      const fullTimer = setTimeout(() => res.end(), 5000);
+      fullTimer.unref();
+      res.on("close", () => clearTimeout(fullTimer));
+      return;
+    }
+
+    res.writeHead(200, {
+      "Content-Type": "text/event-stream; charset=utf-8",
+      "Cache-Control": "no-cache, no-transform",
+      Connection: "keep-alive",
+      "X-Accel-Buffering": "no",
+    });
+    res.write(": connected\n\n");
+
+    const previous = members.get(peer);
+    if (previous && previous !== res) previous.end();
+    const peers = [...members.keys()].filter((id) => id !== peer);
+    members.set(peer, res);
+    sendSse(res, "ready", { peers });
+    broadcast(room, peer, "peer-joined", { peer });
+
+    const keepAlive = setInterval(() => res.write(": keepalive\n\n"), 20000);
+    res.on("close", () => {
+      clearInterval(keepAlive);
+      if (members.get(peer) === res) {
+        members.delete(peer);
+        broadcast(room, peer, "peer-left", { peer });
+      }
+      if (members.size === 0) clients.delete(room);
+    });
+    return;
+  }
+
+  if (req.method === "GET" && url.pathname === "/room-status") {
+    const room = url.searchParams.get("room");
+    if (!safeId(room)) return json(res, 400, { error: "Invalid room." });
+    const occupancy = clients.get(room)?.size || 0;
+    return json(res, 200, { full: occupancy >= 2, occupancy });
+  }
+
+  if (req.method === "POST" && url.pathname === "/signal") {
+    let raw = "";
+    req.on("data", (chunk) => {
+      raw += chunk;
+      if (raw.length > 256_000) req.destroy();
+    });
+    req.on("end", () => {
+      try {
+        const message = JSON.parse(raw);
+        if (!safeId(message.room) || !safeId(message.from) || !safeId(message.to) || !message.data) {
+          return json(res, 400, { error: "Invalid signal." });
+        }
+        const target = roomClients(message.room).get(message.to);
+        if (target) sendSse(target, "signal", { from: message.from, data: message.data });
+        json(res, 200, { delivered: Boolean(target) });
+      } catch {
+        json(res, 400, { error: "Malformed JSON." });
+      }
+    });
+    return;
+  }
+
+  if (req.method === "GET" && url.pathname === "/health") return json(res, 200, { ok: true });
+  json(res, 404, { error: "Not found." });
+});
+
+server.listen(PORT, HOST, () => {
+  console.log(`Murmur is ready at http://${HOST}:${PORT}`);
+});
+
+process.on("SIGINT", () => server.close(() => process.exit(0)));

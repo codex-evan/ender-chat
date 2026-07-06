@@ -1,0 +1,8 @@
+﻿# Encrypted Chat Server - .gitignore
+node_modules/
+dist/
+.env
+uploads/*
+!uploads/.gitkeep
+*.log
+.DS_Store

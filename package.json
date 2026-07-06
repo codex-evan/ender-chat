@@ -1,0 +1,15 @@
+{
+  "name": "murmur-e2ee-chat",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A tiny peer-to-peer, end-to-end encrypted chat room.",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "acorn": "^8.17.0"
+  }
+}

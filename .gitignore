@@ -1,0 +1,43 @@
+﻿# EncChat - Root .gitignore
+## Server
+server/node_modules/
+server/dist/
+server/.env
+server/uploads/**
+!server/uploads/.gitkeep
+
+# Flutter
+app/.dart_tool/
+app/build/
+app/.packages
+app/.metadata
+app/ios/.symlinks/
+app/ios/Flutter/Generated.xcconfig
+app/ios/Flutter/flutter_export_environment.sh
+app/ios/Runner/GeneratedPluginRegistrant.*
+app/android/*.aab
+app/android/*.apk
+app/android/*.apks
+app/android/local.properties
+app/android/.gradle/
+app/android/build/
+app/windows/flutter/ephemeral/
+app/linux/flutter/ephemeral/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Docs
+docs/*.pdf

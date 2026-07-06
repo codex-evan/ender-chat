@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">162.211.181.145</domain>
+        <pin-set>
+            <!-- Pin your server's certificate -->
+        </pin-set>
+    </domain-config>
+</network-security-config>

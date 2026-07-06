@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#f5f5f7" />
+    <title>微语 · 加密聊天</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="noise" aria-hidden="true"></div>
+    <main class="app-shell">
+      <aside class="sidebar" aria-label="聊天列表">
+        <div class="brand-row">
+          <div class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M7.4 4.8h9.2a4.4 4.4 0 0 1 4.4 4.4v4.7a4.4 4.4 0 0 1-4.4 4.4h-5.2l-4.6 2.6.9-2.6h-.3A4.4 4.4 0 0 1 3 13.9V9.2a4.4 4.4 0 0 1 4.4-4.4Z"/></svg>
+          </div>
+          <span>微语</span>
+          <button class="icon-button new-chat" id="newRoomBtn" aria-label="新建聊天室" title="新建聊天室">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+        </div>
+
+        <label class="search-box">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>
+          <input type="search" placeholder="搜索" aria-label="搜索聊天" />
+        </label>
+
+        <div class="section-label">加密聊天室</div>
+        <button class="conversation active">
+          <span class="avatar avatar-room">
+            <svg viewBox="0 0 24 24"><path d="M12 3 5.5 5.7v5c0 4.3 2.7 8.2 6.5 9.6 3.8-1.4 6.5-5.3 6.5-9.6v-5L12 3Z"/><path d="m9.2 11.7 1.8 1.8 3.9-4"/></svg>
+          </span>
+          <span class="conversation-copy">
+            <span class="conversation-title">私密空间</span>
+            <span class="conversation-preview" id="sidebarPreview">等待另一位朋友加入</span>
+          </span>
+          <span class="conversation-time" id="sidebarTime">现在</span>
+        </button>
+
+        <div class="privacy-note">
+          <svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="3"/><path d="M8.5 10V7.5a3.5 3.5 0 0 1 7 0V10"/></svg>
+          <p><strong>只属于你们</strong><br />消息不会保存在服务器上</p>
+        </div>
+      </aside>
+
+      <section class="chat-panel">
+        <header class="chat-header">
+          <button class="icon-button mobile-back" aria-label="返回">
+            <svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+          </button>
+          <div class="peer-avatar" id="peerAvatar">友<span class="presence-dot" id="presenceDot"></span></div>
+          <div class="peer-info">
+            <h1 id="peerName">私密空间</h1>
+            <button class="status-line" id="statusButton">
+              <span id="statusText">正在建立安全连接…</span>
+              <svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+            </button>
+          </div>
+          <div class="header-actions">
+            <button class="invite-button" id="inviteBtn">
+              <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+              <span>邀请朋友</span>
+            </button>
+            <button class="icon-button" id="detailsBtn" aria-label="聊天详情">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
+            </button>
+          </div>
+        </header>
+
+        <div class="messages" id="messages" aria-live="polite">
+          <div class="date-divider"><span>今天</span></div>
+          <div class="welcome-card" id="welcomeCard">
+            <div class="welcome-icon">
+              <svg viewBox="0 0 32 32"><path d="M16 3 7 6.8v6.9c0 6 3.8 11.3 9 13.3 5.2-2 9-7.3 9-13.3V6.8L16 3Z"/><path d="m12 15.7 2.5 2.5 5.5-5.7"/></svg>
+            </div>
+            <h2>端到端加密</h2>
+            <p>只有你和对方能读到这里的消息。<br />就连微语也不行。</p>
+            <div class="waiting-pill" id="waitingPill"><span></span> 等待朋友加入</div>
+          </div>
+        </div>
+
+        <div class="typing-indicator" id="typingIndicator" hidden>
+          <span></span><span></span><span></span>
+        </div>
+
+        <footer class="composer-area">
+          <div class="connection-banner" id="connectionBanner">
+            分享邀请链接，开始一场只属于你们的对话
+          </div>
+          <form class="composer" id="messageForm">
+            <button class="composer-icon" type="button" id="emojiBtn" aria-label="表情">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8.5 14.5s1.2 2 3.5 2 3.5-2 3.5-2M9 9h.01M15 9h.01"/></svg>
+            </button>
+            <textarea id="messageInput" rows="1" maxlength="4000" placeholder="等待安全连接…" disabled aria-label="消息"></textarea>
+            <button class="send-button" id="sendBtn" type="submit" disabled aria-label="发送">
+              <svg viewBox="0 0 24 24"><path d="M12 19V5M6.5 10.5 12 5l5.5 5.5"/></svg>
+            </button>
+          </form>
+          <div class="encryption-label">
+            <svg viewBox="0 0 24 24"><rect x="6" y="10" width="12" height="9" rx="2.5"/><path d="M9 10V7a3 3 0 0 1 6 0v3"/></svg>
+            端到端加密 · 消息仅保留在本机
+          </div>
+        </footer>
+      </section>
+    </main>
+
+    <div class="modal-backdrop" id="inviteModal" hidden>
+      <section class="modal" role="dialog" aria-modal="true" aria-labelledby="inviteTitle">
+        <button class="modal-close" data-close aria-label="关闭">×</button>
+        <div class="modal-hero blue">
+          <svg viewBox="0 0 32 32"><path d="M16 4v24M4 16h24"/></svg>
+        </div>
+        <h2 id="inviteTitle">邀请一位朋友</h2>
+        <p>复制这条私密链接发给对方。链接只负责让两台设备相遇，不会传输明文消息。</p>
+        <div class="link-field"><span id="inviteLink"></span><button id="copyLinkBtn">复制</button></div>
+        <div class="modal-tip"><span>2</span> 房间仅允许两人加入</div>
+      </section>
+    </div>
+
+    <div class="modal-backdrop" id="detailsModal" hidden>
+      <section class="modal details-modal" role="dialog" aria-modal="true" aria-labelledby="detailsTitle">
+        <button class="modal-close" data-close aria-label="关闭">×</button>
+        <div class="modal-hero green">
+          <svg viewBox="0 0 32 32"><path d="M16 3 7 6.8v6.9c0 6 3.8 11.3 9 13.3 5.2-2 9-7.3 9-13.3V6.8L16 3Z"/><path d="m12 15.7 2.5 2.5 5.5-5.7"/></svg>
+        </div>
+        <h2 id="detailsTitle">安全详情</h2>
+        <p>消息通过 WebRTC 直达对方，并使用 AES‑GCM 再加密一层。</p>
+        <div class="detail-row"><span>连接状态</span><strong id="detailConnection">等待连接</strong></div>
+        <div class="detail-row"><span>安全号码</span><strong class="safety-number" id="safetyNumber">— — —</strong></div>
+        <div class="detail-row"><span>服务器可见</span><strong>仅房间与连接信号</strong></div>
+      </section>
+    </div>
+
+    <div class="toast" id="toast" role="status" hidden></div>
+    <script src="app.js"></script>
+  </body>
+</html>
