@@ -1,4 +1,4 @@
-﻿/// Settings screen
+/// Settings screen
 
 import 'package:flutter/material.dart';
 import '../../i18n/app_localizations.dart';
@@ -171,11 +171,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 onPressed: () {
                   Nav.push(context, const PrivacyScreen());
                 },
-                icon: Icon(Icons.lock_outline, color: AppTheme._primaryColor),
-                label: Text(l10n.privacy, style: TextStyle(color: AppTheme._primaryColor)),
+                icon: Icon(Icons.lock_outline, color: AppTheme.primaryColor),
+                label: Text(l10n.privacy, style: TextStyle(color: AppTheme.primaryColor)),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
-                  side: BorderSide(color: AppTheme._primaryColor.withOpacity(0.3)),
+                  side: BorderSide(color: AppTheme.primaryColor.withOpacity(0.3)),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
               ),

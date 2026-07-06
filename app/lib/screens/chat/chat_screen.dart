@@ -1,4 +1,4 @@
-﻿/// Chat screen with anti-screenshot protection
+/// Chat screen with anti-screenshot protection
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -251,7 +251,7 @@ class _ChatScreenState extends State<ChatScreen> {
     final isDark = theme.brightness == Brightness.dark;
     
     return Container(
-      padding: const EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+      padding: EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom),
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF1A1A1A) : Colors.white,
         border: Border(
@@ -295,7 +295,7 @@ class _ChatScreenState extends State<ChatScreen> {
               // Send button
               _IconButton(
                 icon: Icons.send_rounded,
-                color: AppTheme._primaryColor,
+                color: AppTheme.primaryColor,
                 onTap: _sendMessage,
                 filled: true,
               ),

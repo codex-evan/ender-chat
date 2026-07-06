@@ -1,9 +1,10 @@
-﻿/// Room waiting screen - shows room code and invite link for partner to join
+/// Room waiting screen - shows room code and invite link for partner to join
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../i18n/app_localizations.dart';
 import '../../main/app_router.dart';
+import '../../main/app_theme.dart';
 import '../chat/chat_screen.dart';
 
 class RoomWaitingScreen extends StatefulWidget {
@@ -56,14 +57,14 @@ class _RoomWaitingScreenState extends State<RoomWaitingScreen> {
                         width: 120,
                         height: 120,
                         decoration: BoxDecoration(
-                          color: AppTheme._primaryColor.withOpacity(0.1),
+                          color: AppTheme.primaryColor.withOpacity(0.1),
                           shape: BoxShape.circle,
                         ),
                         child: Center(
                           child: Icon(
                             Icons.person_add_outlined,
                             size: 48,
-                            color: AppTheme._primaryColor,
+                            color: AppTheme.primaryColor,
                           ),
                         ),
                       ),
@@ -92,7 +93,7 @@ class _RoomWaitingScreenState extends State<RoomWaitingScreen> {
                         icon: Icons.pin_outlined,
                         title: l10n.roomCode,
                         value: widget.roomCode,
-                        color: AppTheme._primaryColor,
+                        color: AppTheme.primaryColor,
                         onCopy: () => _copyToClipboard(l10n, widget.roomCode, (copied) {
                           setState(() => _copiedCode = copied);
                           Future.delayed(const Duration(seconds: 2), () {
@@ -109,7 +110,7 @@ class _RoomWaitingScreenState extends State<RoomWaitingScreen> {
                         icon: Icons.link_outlined,
                         title: l10n.inviteLink,
                         value: 'encchat://join/${widget.roomSecret}',
-                        color: AppTheme._secondaryColor,
+                        color: AppTheme.secondaryColor,
                         onCopy: () => _copyToClipboard(l10n, 'encchat://join/${widget.roomSecret}', (copied) {
                           setState(() => _copiedLink = copied);
                           Future.delayed(const Duration(seconds: 2), () {
@@ -156,7 +157,7 @@ class _RoomWaitingScreenState extends State<RoomWaitingScreen> {
               TextButton(
                 onPressed: () {
                   // In production, this would wait for partner via WebSocket
-                  Nav.push(context, const ChatScreen(
+                  Nav.push(context, ChatScreen(
                     roomCode: 'DEMO',
                     roomSecret: widget.roomSecret,
                   ));

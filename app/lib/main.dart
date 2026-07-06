@@ -1,4 +1,4 @@
-﻿/// Main entry point for the Encrypted Chat app.
+/// Main entry point for the Encrypted Chat app.
 /// 
 /// This app implements end-to-end encryption for anonymous messaging.
 /// No user accounts, phone numbers, emails, or personal data are collected.
@@ -35,9 +35,9 @@ class EncChatApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider.value(value: AppLocator.cryptoService),
+        Provider.value(value: AppLocator.cryptoService),
         ChangeNotifierProvider.value(value: AppLocator.wsService),
-        ChangeNotifierProvider.value(value: AppLocator.storageService),
+        Provider.value(value: AppLocator.storageService),
       ],
       child: MaterialApp(
         title: AppConfig.appName,

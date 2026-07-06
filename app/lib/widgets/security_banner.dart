@@ -1,7 +1,6 @@
-﻿/// Security warning banner widget
+/// Security warning banner widget
 
 import 'package:flutter/material.dart';
-import '../main/app_theme.dart';
 
 class SecurityBanner extends StatefulWidget {
   final String message;
@@ -20,7 +19,7 @@ class SecurityBanner extends StatefulWidget {
 class _SecurityBannerState extends State<SecurityBanner>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<double> _slideAnimation;
+  late Animation<Offset> _slideAnimation;
   bool _visible = true;
   
   @override
@@ -31,7 +30,10 @@ class _SecurityBannerState extends State<SecurityBanner>
       vsync: this,
     );
     
-    _slideAnimation = Tween<double>(begin: -1.0, end: 0.0).animate(
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, -1),
+      end: Offset.zero,
+    ).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
     );
     

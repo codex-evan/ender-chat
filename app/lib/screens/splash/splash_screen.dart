@@ -1,9 +1,10 @@
-﻿/// Splash screen - shown on app launch
+/// Splash screen - shown on app launch
 
 import 'package:flutter/material.dart';
 import '../../main/app_router.dart';
 import '../../main/app_theme.dart';
 import '../../i18n/app_localizations.dart';
+import '../room/room_select_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -70,11 +71,11 @@ class _SplashScreenState extends State<SplashScreen>
                   width: 80,
                   height: 80,
                   decoration: BoxDecoration(
-                    color: AppTheme._primaryColor,
+                    color: AppTheme.primaryColor,
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: AppTheme._primaryColor.withOpacity(0.3),
+                        color: AppTheme.primaryColor.withOpacity(0.3),
                         blurRadius: 20,
                         offset: const Offset(0, 8),
                       ),

@@ -1,4 +1,4 @@
-﻿/// File attachment picker with encryption progress
+/// File attachment picker with encryption progress
 
 import 'package:flutter/material.dart';
 import '../i18n/app_localizations.dart';
@@ -51,21 +51,21 @@ class FilePickerSheet extends StatelessWidget {
             context: context,
             icon: Icons.image,
             label: l10n.image,
-            color: AppTheme._secondaryColor,
+            color: AppTheme.secondaryColor,
             onTap: () => onSelect('image', ''),
           ),
           _FileOption(
             context: context,
             icon: Icons.videocam,
             label: l10n.video,
-            color: AppTheme._accentColor,
+            color: AppTheme.accentColor,
             onTap: () => onSelect('video', ''),
           ),
           _FileOption(
             context: context,
             icon: Icons.description,
             label: l10n.document,
-            color: AppTheme._primaryColor,
+            color: AppTheme.primaryColor,
             onTap: () => onSelect('document', ''),
           ),
           _FileOption(
@@ -149,7 +149,7 @@ class UploadProgressWidget extends StatelessWidget {
               Icon(
                 isUploading ? Icons.upload_file : Icons.download,
                 size: 20,
-                color: AppTheme._primaryColor,
+                color: AppTheme.primaryColor,
               ),
               const SizedBox(width: 8),
               Expanded(
@@ -167,7 +167,7 @@ class UploadProgressWidget extends StatelessWidget {
                   height: 16,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation(AppTheme._primaryColor),
+                    valueColor: AlwaysStoppedAnimation(AppTheme.primaryColor),
                   ),
                 ),
             ],
@@ -177,7 +177,7 @@ class UploadProgressWidget extends StatelessWidget {
             value: progress,
             minHeight: 4,
             borderRadius: BorderRadius.circular(2),
-            valueColor: AlwaysStoppedAnimation(AppTheme._primaryColor),
+            valueColor: AlwaysStoppedAnimation(AppTheme.primaryColor),
           ),
           const SizedBox(height: 4),
           Text(

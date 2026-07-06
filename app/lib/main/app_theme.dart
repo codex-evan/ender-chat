@@ -1,4 +1,4 @@
-﻿/// App theme definitions - modern, privacy-focused aesthetic
+/// App theme definitions - modern, privacy-focused aesthetic
 
 import 'package:flutter/material.dart';
 
@@ -6,9 +6,9 @@ class AppTheme {
   AppTheme._();
   
   // Color palette - dark, privacy-focused
-  static const _primaryColor = Color(0xFF6C5CE7);
-  static const _secondaryColor = Color(0xFF00CEC9);
-  static const _accentColor = Color(0xFFFD79A8);
+  static const primaryColor = Color(0xFF6C5CE7);
+  static const secondaryColor = Color(0xFF00CEC9);
+  static const accentColor = Color(0xFFFD79A8);
   
   // Dark theme colors
   static const _darkBg = Color(0xFF0D0D0D);
@@ -33,8 +33,8 @@ class AppTheme {
     brightness: Brightness.dark,
     scaffoldBackgroundColor: _darkBg,
     colorScheme: const ColorScheme.dark(
-      primary: _primaryColor,
-      secondary: _secondaryColor,
+      primary: primaryColor,
+      secondary: secondaryColor,
       surface: _darkSurface,
       onSurface: Colors.white,
       primaryContainer: _darkCard,
@@ -68,13 +68,13 @@ class AppTheme {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: _primaryColor, width: 2),
+        borderSide: const BorderSide(color: primaryColor, width: 2),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: _primaryColor,
+        backgroundColor: primaryColor,
         foregroundColor: Colors.white,
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -90,8 +90,8 @@ class AppTheme {
     brightness: Brightness.light,
     scaffoldBackgroundColor: _lightBg,
     colorScheme: const ColorScheme.light(
-      primary: _primaryColor,
-      secondary: _secondaryColor,
+      primary: primaryColor,
+      secondary: secondaryColor,
       surface: _lightSurface,
       onSurface: Colors.black87,
       primaryContainer: _lightCard,
@@ -110,8 +110,10 @@ class AppTheme {
     cardTheme: CardTheme(
       color: _lightSurface,
       elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      border: Border.all(color: _lightBorder),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: _lightBorder),
+      ),
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
@@ -126,13 +128,13 @@ class AppTheme {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: _primaryColor, width: 2),
+        borderSide: const BorderSide(color: primaryColor, width: 2),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: _primaryColor,
+        backgroundColor: primaryColor,
         foregroundColor: Colors.white,
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

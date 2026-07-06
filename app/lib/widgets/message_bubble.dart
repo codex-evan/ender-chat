@@ -1,4 +1,4 @@
-﻿/// Message bubble widget
+/// Message bubble widget
 
 import 'package:flutter/material.dart';
 import '../main/app_theme.dart';
@@ -35,7 +35,7 @@ class MessageBubble extends StatelessWidget {
               constraints: const BoxConstraints(maxWidth: 300),
               decoration: BoxDecoration(
                 color: isOwn
-                    ? AppTheme._primaryColor
+                    ? AppTheme.primaryColor
                     : (isDark ? const Color(0xFF252525) : Colors.white),
                 borderRadius: BorderRadius.only(
                   topLeft: const Radius.circular(16),
@@ -190,13 +190,13 @@ class _Avatar extends StatelessWidget {
       width: 32,
       height: 32,
       decoration: BoxDecoration(
-        color: isOwn ? AppTheme._primaryColor.withOpacity(0.3) : AppTheme._secondaryColor.withOpacity(0.3),
+        color: isOwn ? AppTheme.primaryColor.withOpacity(0.3) : AppTheme.secondaryColor.withOpacity(0.3),
         shape: BoxShape.circle,
       ),
       child: Icon(
         isOwn ? Icons.person_rounded : Icons.face_rounded,
         size: 18,
-        color: isOwn ? AppTheme._primaryColor : AppTheme._secondaryColor,
+        color: isOwn ? AppTheme.primaryColor : AppTheme.secondaryColor,
       ),
     );
   }

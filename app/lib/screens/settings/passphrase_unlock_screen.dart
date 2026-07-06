@@ -1,8 +1,9 @@
-﻿/// Passphrase unlock screen for accessing saved local records
+/// Passphrase unlock screen for accessing saved local records
 
 import 'package:flutter/material.dart';
 import '../../i18n/app_localizations.dart';
 import '../../main/app_router.dart';
+import '../../main/app_theme.dart';
 
 class PassphraseUnlockScreen extends StatefulWidget {
   const PassphraseUnlockScreen({super.key});
@@ -49,7 +50,7 @@ class _PassphraseUnlockScreenState extends State<PassphraseUnlockScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.lock_outline, size: 64, color: AppTheme._primaryColor),
+                  Icon(Icons.lock_outline, size: 64, color: AppTheme.primaryColor),
                   const SizedBox(height: 24),
                   Text(
                     l10n.enterPassphrase,
@@ -106,6 +107,7 @@ class _PassphraseUnlockScreenState extends State<PassphraseUnlockScreen> {
   }
   
   void _tryUnlock() {
+    final l10n = AppLocalizations.of(context)!;
     if (_formKey.currentState!.validate()) {
       setState(() {
         _unlocking = true;

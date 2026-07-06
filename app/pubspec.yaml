@@ -22,12 +22,14 @@ dependencies:
   
   # Local storage
   sqflite: ^2.3.0
+  path: ^1.9.0
   path_provider: ^2.1.1
   crypto: ^3.0.3
   
   # Encryption
   pointycastle: ^3.7.3
   encrypt: ^5.0.3
+  cryptography: ^2.9.0
   
   # UI
   cached_network_image: ^3.3.0

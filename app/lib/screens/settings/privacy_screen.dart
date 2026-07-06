@@ -1,4 +1,4 @@
-﻿/// Privacy and security information screen
+/// Privacy and security information screen
 
 import 'package:flutter/material.dart';
 import '../../i18n/app_localizations.dart';
@@ -39,12 +39,12 @@ class PrivacyScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: AppTheme._primaryColor.withOpacity(0.1),
+                  color: AppTheme.primaryColor.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Column(
                   children: [
-                    Icon(Icons.shield_outlined, size: 48, color: AppTheme._primaryColor),
+                    Icon(Icons.shield_outlined, size: 48, color: AppTheme.primaryColor),
                     const SizedBox(height: 12),
                     Text(
                       l10n.privacyTitle,
@@ -219,10 +219,10 @@ class _PrivacyPoint extends StatelessWidget {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: AppTheme._primaryColor.withOpacity(0.1),
+                color: AppTheme.primaryColor.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: AppTheme._primaryColor, size: 20),
+              child: Icon(icon, color: AppTheme.primaryColor, size: 20),
             ),
             const SizedBox(width: 14),
             Expanded(

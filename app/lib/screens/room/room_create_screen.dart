@@ -1,4 +1,4 @@
-﻿/// Room creation screen
+/// Room creation screen
 
 import 'package:flutter/material.dart';
 import '../../i18n/app_localizations.dart';
@@ -50,7 +50,7 @@ class _RoomCreateScreenState extends State<RoomCreateScreen> {
                 Icon(
                   Icons.lock_outline,
                   size: 64,
-                  color: AppTheme._primaryColor,
+                  color: AppTheme.primaryColor,
                 ),
                 const SizedBox(height: 24),
                 Text(

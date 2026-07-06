@@ -1,4 +1,4 @@
-﻿/// Room selection screen - create or join a room
+/// Room selection screen - create or join a room
 
 import 'package:flutter/material.dart';
 import '../../i18n/app_localizations.dart';
@@ -56,7 +56,7 @@ class _RoomSelectScreenState extends State<RoomSelectScreen> {
                     Icon(
                       Icons.lock_person,
                       size: 48,
-                      color: AppTheme._primaryColor,
+                      color: AppTheme.primaryColor,
                     ),
                     const SizedBox(height: 16),
                     Text(
@@ -77,7 +77,7 @@ class _RoomSelectScreenState extends State<RoomSelectScreen> {
                 icon: Icons.add_circle_outline,
                 title: l10n.createRoom,
                 subtitle: 'Generate a new encrypted room',
-                color: AppTheme._primaryColor,
+                color: AppTheme.primaryColor,
                 onTap: () {
                   Nav.push(context, const RoomCreateScreen());
                 },
@@ -90,7 +90,7 @@ class _RoomSelectScreenState extends State<RoomSelectScreen> {
                 icon: Icons.login,
                 title: l10n.joinRoom,
                 subtitle: 'Enter a room code or invite link',
-                color: AppTheme._secondaryColor,
+                color: AppTheme.secondaryColor,
                 onTap: () {
                   Nav.push(context, const RoomJoinScreen());
                 },
