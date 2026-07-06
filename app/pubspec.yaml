@@ -53,7 +53,7 @@ dependencies:
   flutter_image_compress: ^2.1.0
   
   # Audio
-  record: ^5.0.4
+  record: ^6.2.1
   audioplayers: ^5.2.1
 
 dev_dependencies:
