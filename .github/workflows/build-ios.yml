@@ -14,10 +14,13 @@ jobs:
         with:
           flutter-version: '3.27.4'
           channel: 'stable'
-          cache: true
 
       - name: Verify Flutter
-        run: flutter --version
+        run: |
+          which flutter
+          flutter --version
+          echo "Flutter home: $FLUTTER_ROOT"
+          echo "PATH: $PATH"
 
       - name: Enable iOS support
         run: flutter config --enable-ios
@@ -30,7 +33,6 @@ jobs:
       - name: Install CocoaPods
         run: |
           cd app/ios
-          sudo gem install cocoapods
           pod install --repo-update
 
       - name: Build IPA
