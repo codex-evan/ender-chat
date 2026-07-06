@@ -1,28 +1,386 @@
 ﻿// !$*UTF8*$!
 {
-  archiveVersion = 1;
-  classes = {
-  };
-  objectVersion = 54;
-  objects = {
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
 /* Begin PBXBuildFile section */
-/* End PBXBuildFile section */
+		/* Start of PBXBuildFile section */
+		0K1bK5cR8wX2nP4qL9mY7h /* GeneratedPluginRegistrant.swift in Sources */ = {isa = PBXBuildFile; fileRef = vX3pN8mQ2rT5yU6wA1bC4d /* GeneratedPluginRegistrant.swift */; };
+		1F2gH3iJ4kL5mN6oP7qR8s /* Flutter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = Z9yX8wV7uT6sR5qP4oN3m /* Flutter.framework */; };
+		2A3bC4dE5fG6hI7jK8lM9n /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = O0pQ1rS2tU3vW4xY5zA6b /* AppDelegate.swift */; };
+		3C4dE5fG6hI7jK8lM9nO0p /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = Q1rS2tU3vW4xY5zA6bC7d /* Info.plist */; };
+		4E5fG6hI7jK8lM9nO0pQ1r /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = S2tU3vW4xY5zA6bC7dE8f /* Main.storyboard */; };
+		5G6hI7jK8lM9nO0pQ1rS2t /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = U3vW4xY5zA6bC7dE8fG9h /* LaunchScreen.storyboard */; };
+		6I7jK8lM9nO0pQ1rS2tU3v /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = W4xY5zA6bC7dE8fG9hI0j /* Assets.xcassets */; };
+		/* End of PBXBuildFile section */
+
 /* Begin PBXFileReference section */
-/* End PBXFileReference section */
+		/* Start of PBXFileReference section */
+		O0pQ1rS2tU3vW4xY5zA6b /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		Q1rS2tU3vW4xY5zA6bC7d /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		S2tU3vW4xY5zA6bC7dE8f /* Main.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
+		U3vW4xY5zA6bC7dE8fG9h /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
+		W4xY5zA6bC7dE8fG9hI0j /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		vX3pN8mQ2rT5yU6wA1bC4d /* GeneratedPluginRegistrant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneratedPluginRegistrant.swift; sourceTree = "<group>"; };
+		Z9yX8wV7uT6sR5qP4oN3m /* Flutter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Flutter.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		A1bC2dE3fG4hI5jK6lM7n /* Runner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Runner.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		/* End of PBXFileReference section */
+
 /* Begin PBXFrameworksBuildPhase section */
-/* End PBXFrameworksBuildPhase section */
+		/* Start of PBXFrameworksBuildPhase section */
+		B8cD9eF0gH1iJ2kL3mN4o /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1F2gH3iJ4kL5mN6oP7qR8s /* Flutter.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		/* End of PBXFrameworksBuildPhase section */
+
 /* Begin PBXGroup section */
-/* End PBXGroup section */
+		/* Start of PBXGroup section */
+		C5dE6fG7hI8jK9lM0nO1p /* Runner */ = {
+			isa = PBXGroup;
+			children = (
+				D6eF7gH8iJ9kL0mN1oP2q /* Runner */,
+				E7fG8hI9jK0lM1nO2pQ3r /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		D6eF7gH8iJ9kL0mN1oP2q /* Runner */ = {
+			isa = PBXGroup;
+			children = (
+				F8gH9iJ0kL1mN2oP3qR4s /* GeneratedPluginRegistrant.swift */,
+				O0pQ1rS2tU3vW4xY5zA6b /* AppDelegate.swift */,
+				Q1rS2tU3vW4xY5zA6bC7d /* Info.plist */,
+				S2tU3vW4xY5zA6bC7dE8f /* Main.storyboard */,
+				U3vW4xY5zA6bC7dE8fG9h /* LaunchScreen.storyboard */,
+				W4xY5zA6bC7dE8fG9hI0j /* Assets.xcassets */,
+			);
+			path = Runner;
+			sourceTree = "<group>";
+		};
+		E7fG8hI9jK0lM1nO2pQ3r /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A1bC2dE3fG4hI5jK6lM7n /* Runner.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		F8gH9iJ0kL1mN2oP3qR4s /* GeneratedPluginRegistrant.swift */ = {
+			isa = PBXGroup;
+			children = (
+				vX3pN8mQ2rT5yU6wA1bC4d /* GeneratedPluginRegistrant.swift */,
+			);
+			path = GeneratedPluginRegistrant.swift;
+			sourceTree = "<group>";
+		};
+		/* End of PBXGroup section */
+
 /* Begin PBXNativeTarget section */
-/* End PBXNativeTarget section */
+		/* Start of PBXNativeTarget section */
+		G9hI0jK1lM2nO3pQ4rS5t /* Runner */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = V0wX1yZ2aB3cD4eF5gH6i /* Build configuration list for PBXNativeTarget "Runner" */;
+			buildPhases = (
+				H1iJ2kL3mN4oP5qR6sT7u /* Sources */,
+				B8cD9eF0gH1iJ2kL3mN4o /* Frameworks */,
+				I2jK3lM4nO5pQ6rS7tU8v /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Runner;
+			productName = Runner;
+			productReference = A1bC2dE3fG4hI5jK6lM7n /* Runner.app */;
+			productType = "com.apple.product-type.application";
+		};
+		/* End of PBXNativeTarget section */
+
 /* Begin PBXProject section */
-/* End PBXProject section */
+		/* Start of PBXProject section */
+		J3kL4mN5oP6qR7sT8uV9w /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+			};
+			buildConfigurationList = K4lM5nO6pQ7rS8tU9vW0x /* Build configuration list for PBXProject "Runner" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+				zh-Hans,
+			);
+			mainGroup = C5dE6fG7hI8jK9lM0nO1p /* Runner */;
+			productRefGroup = E7fG8hI9jK0lM1nO2pQ3r /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				G9hI0jK1lM2nO3pQ4rS5t /* Runner */,
+			);
+		};
+		/* End of PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		/* Start of PBXResourcesBuildPhase section */
+		I2jK3lM4nO5pQ6rS7tU8v /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3C4dE5fG6hI7jK8lM9nO0p /* Info.plist in Resources */,
+				4E5fG6hI7jK8lM9nO0pQ1r /* Main.storyboard in Resources */,
+				5G6hI7jK8lM9nO0pQ1rS2t /* LaunchScreen.storyboard in Resources */,
+				6I7jK8lM9nO0pQ1rS2tU3v /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		/* End of PBXResourcesBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
-/* End PBXSourcesBuildPhase section */
+		/* Start of PBXSourcesBuildPhase section */
+		H1iJ2kL3mN4oP5qR6sT7u /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2A3bC4dE5fG6hI7jK8lM9n /* AppDelegate.swift in Sources */,
+				0K1bK5cR8wX2nP4qL9mY7h /* GeneratedPluginRegistrant.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		/* End of PBXSourcesBuildPhase section */
+
 /* Begin XCBuildConfiguration section */
-/* End XCBuildConfiguration section */
+		/* Start of XCBuildConfiguration section */
+		L5mN6oP7qR8sT9uV0wX1y /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "arm64";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				FlutterTestFramework_PATH = "$(BUILT_PRODUCTS_DIR)/include/Flutter";
+				FRAMEWORK_SEARCH_PATHS = "$(inherited) $(SDKROOT_PATH)/developer/usr/lib";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				INFOPLIST_FILE = "$(SRCROOT)/Runner/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.encchat.app";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		M6nO7pQ8rS9tU0vW1xY2z /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "arm64";
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				FlutterTestFramework_PATH = "$(BUILT_PRODUCTS_DIR)/include/Flutter";
+				FRAMEWORK_SEARCH_PATHS = "$(inherited) $(SDKROOT_PATH)/developer/usr/lib";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = "$(SRCROOT)/Runner/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.encchat.app.release";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		N7oP8qR9sT0uV1wX2yZ3a /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_STRICT_OPTIONAL_TYPING = YES;
+			};
+			name = Debug;
+		};
+		O8pQ9rS0tU1vW2xY3zA4b /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_STRICT_OPTIONAL_TYPING = YES;
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+		P9qR0sT1uV2wX3yZ4aB5c /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
+				ENABLE_UPDATES_TO_THE_RUNNING_APP = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.encchat.app";
+				PRODUCT_NAME = "Runner";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+			};
+			name = Debug;
+		};
+		Q0rS1tU2vW3xY4zA5bC6d /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.encchat.app.release";
+				PRODUCT_NAME = "Runner";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+			};
+			name = Release;
+		};
+		/* End of XCBuildConfiguration section */
+
 /* Begin XCConfigurationList section */
-/* End XCConfigurationList section */
-  };
-  rootObject = "00000000-0000-0000-0000-000000000000""ProjectObject;"
+		/* Start of XCConfigurationList section */
+		K4lM5nO6pQ7rS8tU9vW0x /* Build configuration list for PBXProject "Runner" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				N7oP8qR9sT0uV1wX2yZ3a /* Debug */,
+				O8pQ9rS0tU1vW2xY3zA4b /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		V0wX1yZ2aB3cD4eF5gH6i /* Build configuration list for PBXNativeTarget "Runner" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				P9qR0sT1uV2wX3yZ4aB5c /* Debug */,
+				Q0rS1tU2vW3xY4zA5bC6d /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		/* End of XCConfigurationList section */
+
+/* End of PBXBuildFile section */
+/* End of PBXFileReference section */
+/* End of PBXFrameworksBuildPhase section */
+/* End of PBXGroup section */
+/* End of PBXNativeTarget section */
+/* End of PBXProject section */
+/* End of PBXResourcesBuildPhase section */
+/* End of PBXSourcesBuildPhase section */
+/* End of XCBuildConfiguration section */
+/* End of XCConfigurationList section */
+	};
+	rootObject = J3kL4mN5oP6qR7sT8uV9w /* Project object */;
 }
