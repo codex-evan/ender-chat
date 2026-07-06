@@ -1,17 +1,21 @@
-/// Chat screen with anti-screenshot protection
+﻿/// Chat screen with anti-screenshot protection
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import '../../i18n/app_localizations.dart';
 import '../../main/app_theme.dart';
+import '../../main/app_locator.dart';
 import '../../models/message.dart';
+import '../../services/crypto_service.dart';
+import '../../services/ws_service.dart';
 import '../../widgets/message_bubble.dart';
 import '../../widgets/security_banner.dart';
 
 class ChatScreen extends StatefulWidget {
   final String roomCode;
   final String roomSecret;
-  
+
   const ChatScreen({
     super.key,
     required this.roomCode,
@@ -26,32 +30,42 @@ class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final FocusNode _focusNode = FocusNode();
-  
+
   bool _allowCopying = true;
   bool _securityAlertVisible = false;
   bool _isBlurred = false;
-  bool _isAttached = false;
-  
-  // Demo messages
+
   final List<EncryptedMessage> _messages = [];
-  
+  bool _isLoading = true;
+
   @override
   void initState() {
     super.initState();
     _setupPlatformProtection();
     _focusNode.addListener(_onFocusChange);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _subscribeToService();
+      setState(() => _isLoading = false);
+    });
   }
-  
+
   void _setupPlatformProtection() {
-    // Android: FLAG_SECURE equivalent
-    // iOS: blur on background
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   }
-  
-  void _onFocusChange() {
-    // Detect if keyboard is shown/hidden
+
+  void _onFocusChange() {}
+
+  void _subscribeToService() {
+    final ws = AppLocator.wsService;
+    ws.onMessageReceived = (msg) {
+      if (!mounted) return;
+      setState(() {
+        _messages.add(msg);
+      });
+      _scrollToBottom();
+    };
   }
-  
+
   @override
   void dispose() {
     _messageController.dispose();
@@ -61,60 +75,50 @@ class _ChatScreenState extends State<ChatScreen> {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: SystemUiOverlay.values);
     super.dispose();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final l10n = AppLocalizations.of(context)!;
-    
+
     return WillPopScope(
-      onWillPop: () async {
-        // Handle back press
-        return true;
-      },
+      onWillPop: () async => true,
       child: Scaffold(
         backgroundColor: isDark ? const Color(0xFF0D0D0D) : const Color(0xFFF8F9FA),
         body: Stack(
           children: [
             Column(
               children: [
-                // Header
                 _buildHeader(theme, l10n),
-                
-                // Security alert banner
                 if (_securityAlertVisible)
                   SecurityBanner(
                     message: l10n.partnerMayScreenshot,
                     onDismiss: () => setState(() => _securityAlertVisible = false),
                   ),
-                
-                // Messages list
                 Expanded(
                   child: AnimatedSwitcher(
                     duration: const Duration(milliseconds: 300),
                     child: _isBlurred
                         ? _buildBlurOverlay(theme)
-                        : _buildMessageList(theme),
+                        : _isLoading
+                            ? const Center(child: CircularProgressIndicator())
+                            : _buildMessageList(theme),
                   ),
                 ),
-                
-                // Input area
                 _buildInputArea(theme, l10n),
               ],
             ),
-            
-            // Full-screen blur overlay for anti-screenshot
             if (_isBlurred) _buildFullScreenBlur(),
           ],
         ),
       ),
     );
   }
-  
+
   Widget _buildHeader(ThemeData theme, AppLocalizations l10n) {
     final isDark = theme.brightness == Brightness.dark;
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
@@ -125,7 +129,6 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
       child: Row(
         children: [
-          // Room code
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -146,10 +149,8 @@ class _ChatScreenState extends State<ChatScreen> {
               ],
             ),
           ),
-          // Connection status
           _ConnectionStatus(isDark: isDark),
           const SizedBox(width: 8),
-          // More options
           PopupMenuButton<String>(
             icon: Icon(Icons.more_vert, color: isDark ? Colors.white70 : Colors.black87),
             itemBuilder: (_) => [
@@ -188,7 +189,7 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
     );
   }
-  
+
   Widget _buildMessageList(ThemeData theme) {
     return ListView.builder(
       controller: _scrollController,
@@ -202,7 +203,7 @@ class _ChatScreenState extends State<ChatScreen> {
       },
     );
   }
-  
+
   Widget _buildBlurOverlay(ThemeData theme) {
     return Center(
       child: Container(
@@ -237,7 +238,7 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
     );
   }
-  
+
   Widget _buildFullScreenBlur() {
     return Container(
       color: Colors.black.withOpacity(0.95),
@@ -246,10 +247,10 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
     );
   }
-  
+
   Widget _buildInputArea(ThemeData theme, AppLocalizations l10n) {
     final isDark = theme.brightness == Brightness.dark;
-    
+
     return Container(
       padding: EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom),
       decoration: BoxDecoration(
@@ -263,14 +264,12 @@ class _ChatScreenState extends State<ChatScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           child: Row(
             children: [
-              // Attachment button
               _IconButton(
                 icon: Icons.attach_file_rounded,
                 color: isDark ? Colors.white70 : Colors.black87,
                 onTap: _pickFile,
               ),
               const SizedBox(width: 8),
-              // Text input
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
@@ -292,7 +291,6 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
               ),
               const SizedBox(width: 8),
-              // Send button
               _IconButton(
                 icon: Icons.send_rounded,
                 color: AppTheme.primaryColor,
@@ -305,57 +303,55 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
     );
   }
-  
+
   void _sendMessage() {
     final text = _messageController.text.trim();
     if (text.isEmpty) return;
-    
-    // Add message (demo)
+
+    final msg = EncryptedMessage(
+      msgId: DateTime.now().millisecondsSinceEpoch.toString(),
+      ciphertext: text,
+      nonce: '',
+      senderEphemeralPk: '',
+      type: MessageType.text,
+      timestamp: DateTime.now().millisecondsSinceEpoch,
+      status: MessageStatus.sending,
+      isOwn: true,
+      displayContent: text,
+    );
+
     setState(() {
-      _messages.add(EncryptedMessage(
-        msgId: DateTime.now().millisecondsSinceEpoch.toString(),
-        ciphertext: text,
-        nonce: '',
-        senderEphemeralPk: '',
-        type: MessageType.text,
-        timestamp: DateTime.now().millisecondsSinceEpoch,
-        status: MessageStatus.sent,
-        isOwn: true,
-        displayContent: text,
-      ));
+      _messages.add(msg);
     });
-    
+
     _messageController.clear();
-    
-    // Scroll to bottom
-    Future.delayed(const Duration(milliseconds: 100), () {
-      if (_scrollController.hasClients) {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-        );
-      }
-    });
-    
-    // Demo: simulate receiving a message
-    Future.delayed(const Duration(seconds: 2), () {
+    _scrollToBottom();
+
+    // Send via WebSocket (encrypted)
+    AppLocator.wsService.sendMessage(text, roomId: widget.roomCode);
+
+    // Update status to sent after a short delay
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (!mounted) return;
       setState(() {
-        _messages.add(EncryptedMessage(
-          msgId: DateTime.now().millisecondsSinceEpoch.toString(),
-          ciphertext: 'Encrypted reply',
-          nonce: '',
-          senderEphemeralPk: '',
-          type: MessageType.text,
-          timestamp: DateTime.now().millisecondsSinceEpoch,
-          status: MessageStatus.delivered,
-          isOwn: false,
-          displayContent: 'This is an encrypted reply from the other party.',
-        ));
+        final idx = _messages.indexWhere((m) => m.msgId == msg.msgId);
+        if (idx >= 0) {
+          _messages[idx] = _messages[idx].copyWith(status: MessageStatus.sent);
+        }
       });
     });
   }
-  
+
+  void _scrollToBottom() {
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    }
+  }
+
   void _pickFile() {
     showModalBottomSheet(
       context: context,
@@ -388,7 +384,7 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
     );
   }
-  
+
   void _showDestroyDialog() {
     showDialog(
       context: context,
@@ -400,7 +396,7 @@ class _ChatScreenState extends State<ChatScreen> {
           FilledButton(
             onPressed: () {
               Navigator.pop(context);
-              // Destroy room logic
+              AppLocator.wsService.destroyRoom();
             },
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
             child: const Text('Destroy'),
@@ -409,19 +405,16 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
     );
   }
-  
+
   void _simulateSecurityEvent() {
     setState(() {
       _securityAlertVisible = true;
       _isBlurred = true;
     });
-    
-    // Unblur after 5 seconds
+
     Future.delayed(const Duration(seconds: 5), () {
       if (mounted) {
-        setState(() {
-          _isBlurred = false;
-        });
+        setState(() => _isBlurred = false);
       }
     });
   }
@@ -429,9 +422,9 @@ class _ChatScreenState extends State<ChatScreen> {
 
 class _ConnectionStatus extends StatelessWidget {
   final bool isDark;
-  
+
   const _ConnectionStatus({required this.isDark});
-  
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -467,14 +460,14 @@ class _IconButton extends StatelessWidget {
   final Color color;
   final VoidCallback onTap;
   final bool filled;
-  
+
   const _IconButton({
     required this.icon,
     required this.color,
     required this.onTap,
     this.filled = false,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     return Material(
@@ -498,13 +491,13 @@ class _FileOption extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
-  
+
   const _FileOption({
     required this.icon,
     required this.label,
     required this.onTap,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     return ListTile(

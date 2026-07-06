@@ -1,16 +1,18 @@
-/// Room waiting screen - shows room code and invite link for partner to join
+﻿/// Room waiting screen - shows room code and invite link for partner to join
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../i18n/app_localizations.dart';
 import '../../main/app_router.dart';
 import '../../main/app_theme.dart';
+import '../../main/app_locator.dart';
+import '../../models/message.dart';
 import '../chat/chat_screen.dart';
 
 class RoomWaitingScreen extends StatefulWidget {
   final String roomCode;
   final String roomSecret;
-  
+
   const RoomWaitingScreen({
     super.key,
     required this.roomCode,
@@ -24,14 +26,37 @@ class RoomWaitingScreen extends StatefulWidget {
 class _RoomWaitingScreenState extends State<RoomWaitingScreen> {
   bool _copiedCode = false;
   bool _copiedLink = false;
-  int _partnerCount = 0;
-  
+  bool _partnerJoined = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _subscribeToService();
+  }
+
+  void _subscribeToService() {
+    final ws = AppLocator.wsService;
+    ws.onPartnerJoined = (roomCode) {
+      if (!mounted) return;
+      setState(() => _partnerJoined = true);
+      // Navigate to chat when partner joins
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (mounted) {
+          Nav.push(context, ChatScreen(
+            roomCode: widget.roomCode,
+            roomSecret: widget.roomSecret,
+          ));
+        }
+      });
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final l10n = AppLocalizations.of(context)!;
-    
+
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF0D0D0D) : const Color(0xFFF8F9FA),
       appBar: AppBar(
@@ -52,7 +77,6 @@ class _RoomWaitingScreenState extends State<RoomWaitingScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      // Status indicator
                       Container(
                         width: 120,
                         height: 120,
@@ -62,14 +86,14 @@ class _RoomWaitingScreenState extends State<RoomWaitingScreen> {
                         ),
                         child: Center(
                           child: Icon(
-                            Icons.person_add_outlined,
+                            _partnerJoined ? Icons.check_circle : Icons.person_add_outlined,
                             size: 48,
-                            color: AppTheme.primaryColor,
+                            color: _partnerJoined ? Colors.green : AppTheme.primaryColor,
                           ),
                         ),
                       ),
                       const SizedBox(height: 24),
-                      
+
                       Text(
                         l10n.waitingTitle,
                         style: theme.textTheme.headlineMedium?.copyWith(
@@ -79,15 +103,14 @@ class _RoomWaitingScreenState extends State<RoomWaitingScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        l10n.waitingForPartner,
+                        _partnerJoined ? l10n.partnerJoined : l10n.waitingForPartner,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: isDark ? Colors.white54 : Colors.black54,
                         ),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 32),
-                      
-                      // Room code card
+
                       _ShareCard(
                         context: context,
                         icon: Icons.pin_outlined,
@@ -97,14 +120,13 @@ class _RoomWaitingScreenState extends State<RoomWaitingScreen> {
                         onCopy: () => _copyToClipboard(l10n, widget.roomCode, (copied) {
                           setState(() => _copiedCode = copied);
                           Future.delayed(const Duration(seconds: 2), () {
-                            setState(() => _copiedCode = false);
+                            if (mounted) setState(() => _copiedCode = false);
                           });
                         }),
                         copied: _copiedCode,
                       ),
                       const SizedBox(height: 16),
-                      
-                      // Invite link card
+
                       _ShareCard(
                         context: context,
                         icon: Icons.link_outlined,
@@ -114,15 +136,14 @@ class _RoomWaitingScreenState extends State<RoomWaitingScreen> {
                         onCopy: () => _copyToClipboard(l10n, 'encchat://join/${widget.roomSecret}', (copied) {
                           setState(() => _copiedLink = copied);
                           Future.delayed(const Duration(seconds: 2), () {
-                            setState(() => _copiedLink = false);
+                            if (mounted) setState(() => _copiedLink = false);
                           });
                         }),
                         copied: _copiedLink,
                       ),
-                      
+
                       const SizedBox(height: 32),
-                      
-                      // Instructions
+
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
@@ -152,29 +173,16 @@ class _RoomWaitingScreenState extends State<RoomWaitingScreen> {
                   ),
                 ),
               ),
-              
-              // Auto-advance button (demo)
-              TextButton(
-                onPressed: () {
-                  // In production, this would wait for partner via WebSocket
-                  Nav.push(context, ChatScreen(
-                    roomCode: 'DEMO',
-                    roomSecret: widget.roomSecret,
-                  ));
-                },
-                child: Text('Demo: Skip to chat'),
-              ),
             ],
           ),
         ),
       ),
     );
   }
-  
+
   void _copyToClipboard(AppLocalizations l10n, String text, Function(bool) onCopied) {
     Clipboard.setData(ClipboardData(text: text));
     onCopied(true);
-    // Show snackbar
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(l10n.copied),
@@ -193,7 +201,7 @@ class _ShareCard extends StatelessWidget {
   final Color color;
   final VoidCallback onCopy;
   final bool copied;
-  
+
   const _ShareCard({
     required this.context,
     required this.icon,
@@ -203,12 +211,12 @@ class _ShareCard extends StatelessWidget {
     required this.onCopy,
     required this.copied,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -223,37 +231,28 @@ class _ShareCard extends StatelessWidget {
               Icon(icon, color: color, size: 20),
               const SizedBox(width: 8),
               Text(title, style: theme.textTheme.titleSmall?.copyWith(
-                color: isDark ? Colors.white70 : Colors.black87,
                 fontWeight: FontWeight.w600,
               )),
             ],
           ),
           const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: (isDark ? Colors.white : Colors.black).withOpacity(0.06),
-              borderRadius: BorderRadius.circular(8),
+          Text(
+            value,
+            style: theme.textTheme.bodyLarge?.copyWith(
+              fontFamily: 'monospace',
+              letterSpacing: 2,
+              color: color,
             ),
-            child: Text(
-              value,
-              style: theme.textTheme.headlineLarge?.copyWith(
-                fontFamily: 'monospace',
-                letterSpacing: 4,
-                color: color,
-                fontWeight: FontWeight.bold,
-              ),
-              textAlign: TextAlign.center,
-            ),
+            textAlign: TextAlign.center,
           ),
           const SizedBox(height: 12),
-          FilledButton.icon(
+          FilledButton.tonalIcon(
             onPressed: onCopy,
             icon: Icon(copied ? Icons.check : Icons.copy, size: 18),
             label: Text(copied ? 'Copied!' : 'Copy'),
             style: FilledButton.styleFrom(
-              backgroundColor: color,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              backgroundColor: color.withOpacity(0.1),
+              foregroundColor: color,
             ),
           ),
         ],

@@ -1,9 +1,10 @@
-/// Room creation screen
+﻿/// Room creation screen
 
 import 'package:flutter/material.dart';
 import '../../i18n/app_localizations.dart';
 import '../../main/app_theme.dart';
 import '../../main/app_router.dart';
+import '../../main/app_locator.dart';
 import '../../services/crypto_service.dart';
 import 'room_waiting_screen.dart';
 
@@ -17,13 +18,13 @@ class RoomCreateScreen extends StatefulWidget {
 class _RoomCreateScreenState extends State<RoomCreateScreen> {
   bool _creating = false;
   final CryptoService _crypto = CryptoService();
-  
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final l10n = AppLocalizations.of(context)!;
-    
+
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF0D0D0D) : const Color(0xFFF8F9FA),
       appBar: AppBar(
@@ -67,7 +68,7 @@ class _RoomCreateScreenState extends State<RoomCreateScreen> {
                   ),
                 ),
                 const SizedBox(height: 40),
-                
+
                 if (_creating)
                   const CircularProgressIndicator()
                 else
@@ -76,7 +77,7 @@ class _RoomCreateScreenState extends State<RoomCreateScreen> {
                     icon: const Icon(Icons.add_circle_outline),
                     label: Text(l10n.create),
                   ),
-                
+
                 const SizedBox(height: 16),
                 TextButton(
                   onPressed: () => Nav.pop(context),
@@ -89,17 +90,19 @@ class _RoomCreateScreenState extends State<RoomCreateScreen> {
       ),
     );
   }
-  
+
   Future<void> _createRoom() async {
     setState(() => _creating = true);
-    
-    // Simulate room creation delay
+
     await Future.delayed(const Duration(milliseconds: 800));
-    
+
     if (mounted) {
       final roomCode = _crypto.generateRoomCode();
       final roomSecret = _crypto.generateRoomSecret();
-      
+
+      // Notify server to create the room
+      AppLocator.wsService.createRoom();
+
       Nav.push(context, RoomWaitingScreen(
         roomCode: roomCode,
         roomSecret: roomSecret,

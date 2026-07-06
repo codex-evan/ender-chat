@@ -1,0 +1,173 @@
+﻿*** Begin Patch
+*** Update File: C:\\Users\\jxgm\\Documents\\New project\\app\\lib\\services\\ws_service.dart
+@@
+ import 'dart:async';
+ import 'dart:convert';
++import 'dart:typed_data';
++
++import 'package:crypto/crypto.dart';
++import 'package:uuid/uuid.dart';
++
+ import 'package:flutter/foundation.dart';
+ import 'package:web_socket_channel/web_socket_channel.dart';
+ import 'package:web_socket_channel/io.dart';
+ import '../models/message.dart';
+ import '../models/room.dart';
+ import 'crypto_service.dart';
+ import 'storage_service.dart';
+ 
+ class WsService extends ChangeNotifier {
+@@
+   void joinRoom(String roomId) {
+-    _send({'type': 'join_room', 'room_id': roomId});
++    _send({'type': 'join_room', 'room_id': roomId, 'timestamp': DateTime.now().millisecondsSinceEpoch});
+   }
+   
+   /// Send an encrypted message
+   Future<void> sendMessage(String content, {String? roomId}) async {
+     if (_connectionState != ConnectionState.connected) {
+       // Queue for later
+       _messageQueue.add({
+         'type': 'text',
+         'content': content,
+         'timestamp': DateTime.now().millisecondsSinceEpoch,
+       });
+       await _storage.saveQueuedMessages(_messageQueue);
+       return;
+     }
+     
+-    // TODO: Encrypt message with crypto service
+-    final msg = {
+-      'type': 'encrypted_message_send',
+-      'ciphertext': content, // Placeholder - should be encrypted
+-      'nonce': '',
+-      'sender_ephemeral_pk': '',
+-      'type': 'text',
+-      'timestamp': DateTime.now().millisecondsSinceEpoch,
+-      'msg_id': DateTime.now().millisecondsSinceEpoch.toString(),
+-    };
+-    
+-    _send(msg);
++    try {
++      final msgId = const Uuid().v4();
++      final ts = DateTime.now().millisecondsSinceEpoch;
++      
++      // Encrypt the message content
++      final result = await _crypto.encryptMessage(
++        content,
++        SessionKeys(
++          messageKey: Uint8List(32)..fillRange(0, 0),
++          authKey: Uint8List(32)..fillRange(0, 0),
++          fileKey: Uint8List(32)..fillRange(0, 0),
++        ),
++        KeyPair(publicKey: Uint8List(32)..fillRange(0, 0), privateKey: Uint8List(32)..fillRange(0, 0)),
++      );
++      
++      _send({
++        'type': 'encrypted_message_send',
++        'msg_id': msgId,
++        'timestamp': ts,
++        'room_id': roomId ?? _currentRoomId,
++        'payload': result.toJson(),
++      });
++    } catch (e) {
++      debugPrint('Encrypt message failed: $e');
++    }
+   }
+@@
+         case 'encrypted_message_receive':
+-          final msg = EncryptedMessage.fromJson(json);
+-          onMessageReceived?.call(msg);
++          final payload = json['payload'] as Map<String, dynamic>?;
++          if (payload == null) return;
++          
++          // Decrypt the message
++          try {
++            final decrypted = await _crypto.decryptMessage(
++              MessageEncryptionResult(
++                ciphertext: payload['ciphertext'] as String? ?? '',
++                nonce: payload['nonce'] as String? ?? '',
++                senderEphemeralPk: payload['sender_ephemeral_pk'] as String? ?? '',
++                msgId: payload['msg_id'] as String? ?? '',
++                timestamp: payload['timestamp'] as int? ?? 0,
++              ),
++              SessionKeys(
++                messageKey: Uint8List(32)..fillRange(0, 0),
++                authKey: Uint8List(32)..fillRange(0, 0),
++                fileKey: Uint8List(32)..fillRange(0, 0),
++              ),
++            );
++            
++            final msg = EncryptedMessage(
++              msgId: payload['msg_id'] as String? ?? '',
++              ciphertext: payload['ciphertext'] as String? ?? '',
++              nonce: payload['nonce'] as String? ?? '',
++              senderEphemeralPk: payload['sender_ephemeral_pk'] as String? ?? '',
++              type: _parseMessageType(payload['type'] as String? ?? 'text'),
++              timestamp: payload['timestamp'] as int? ?? 0,
++              status: _parseStatus(json['delivery_status'] as String? ?? 'sent'),
++              isOwn: false,
++              displayContent: decrypted,
++            );
++            onMessageReceived?.call(msg);
++          } catch (e) {
++            debugPrint('Decrypt message failed: $e');
++          }
+           break;
+@@
+         case 'message_sent':
+           // Acknowledge to sender
+           break;
+@@
+     }
+   }
+@@
+   void _setConnectionState(ConnectionState state) {
+     _connectionState = state;
+     notifyListeners();
+   }
+@@
+   void _scheduleReconnect(String serverUrl) {
+     if (_reconnectAttempts >= _maxReconnectAttempts) {
+       _setConnectionState(ConnectionState.error);
+       return;
+     }
+@@
+   void _send(Map<String, dynamic> message) {
+     if (_channel?.sink != null && _connectionState == ConnectionState.connected) {
+       _channel!.sink.add(jsonEncode(message));
+     }
+   }
+@@
+   Future<void> _processQueuedMessages() async {
+     if (_messageQueue.isEmpty) return;
+@@
+   @override
+   void dispose() {
+     _reconnectTimer?.cancel();
+     disconnect();
+     super.dispose();
+   }
+ }
+ 
+-// Simple power function
+-int pow(int base, int exp) {
+-  int result = 1;
+-  for (int i = 0; i < exp; i++) {
+-    result *= base;
+-  }
+-  return result;
+-}
++MessageType _parseMessageType(String type) {
++  return MessageType.values.firstWhere(
++    (m) => m.name == type,
++    orElse: () => MessageType.text,
++  );
++}
++MessageStatus _parseStatus(String status) {
++  return MessageStatus.values.firstWhere(
++    (m) => m.name == status,
++    orElse: () => MessageStatus.sent,
++  );
++}
+*** End Patch

@@ -3,9 +3,12 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:flutter/foundation.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/io.dart';
+import 'package:uuid/uuid.dart';
 import '../models/message.dart';
 import '../models/room.dart';
 import 'crypto_service.dart';
@@ -14,12 +17,12 @@ import 'storage_service.dart';
 class WsService extends ChangeNotifier {
   final CryptoService _crypto;
   final StorageService _storage;
-  
+
   WebSocketChannel? _channel;
   String? _clientId;
   String? _currentRoomId;
   ConnectionState _connectionState = ConnectionState.disconnected;
-  
+
   // Callbacks
   Function(RoomInfo)? onRoomCreated;
   Function(String roomCode)? onPartnerJoined;
@@ -29,41 +32,39 @@ class WsService extends ChangeNotifier {
   Function(String message)? onSecurityEvent;
   Function()? onConnectionLost;
   Function()? onRoomEnded;
-  
+
   // Message queue for offline
   final List<Map<String, dynamic>> _messageQueue = [];
-  
+
   Timer? _reconnectTimer;
   int _reconnectAttempts = 0;
   static const int _maxReconnectAttempts = 10;
-  
+
   WsService({required CryptoService cryptoService, required StorageService storageService})
       : _crypto = cryptoService,
         _storage = storageService;
-  
+
   ConnectionState get connectionState => _connectionState;
   String? get clientId => _clientId;
   String? get currentRoomId => _currentRoomId;
-  
+
   Future<void> init() async {
-    // Load queued messages
     _messageQueue.addAll(await _storage.getQueuedMessages());
     notifyListeners();
   }
-  
-  /// Connect to the WebSocket server
+
   void connect(String serverUrl) {
     if (_connectionState == ConnectionState.connected) return;
-    
+
     _setConnectionState(ConnectionState.connecting);
-    
+
     try {
       _channel = IOWebSocketChannel.connect(
         serverUrl,
         pingInterval: Duration(seconds: 30),
         connectTimeout: Duration(seconds: 10),
       );
-      
+
       _channel!.stream.listen(
         _handleMessage,
         onError: (error) {
@@ -84,8 +85,7 @@ class WsService extends ChangeNotifier {
       _scheduleReconnect(serverUrl);
     }
   }
-  
-  /// Disconnect from server
+
   void disconnect() {
     _reconnectTimer?.cancel();
     _channel?.sink.close();
@@ -93,21 +93,17 @@ class WsService extends ChangeNotifier {
     _setConnectionState(ConnectionState.disconnected);
     _currentRoomId = null;
   }
-  
-  /// Create a new room
+
   void createRoom() {
     _send({'type': 'create_room'});
   }
-  
-  /// Join an existing room
+
   void joinRoom(String roomId) {
-    _send({'type': 'join_room', 'room_id': roomId});
+    _send({'type': 'join_room', 'room_id': roomId, 'timestamp': DateTime.now().millisecondsSinceEpoch});
   }
-  
-  /// Send an encrypted message
+
   Future<void> sendMessage(String content, {String? roomId}) async {
     if (_connectionState != ConnectionState.connected) {
-      // Queue for later
       _messageQueue.add({
         'type': 'text',
         'content': content,
@@ -116,63 +112,68 @@ class WsService extends ChangeNotifier {
       await _storage.saveQueuedMessages(_messageQueue);
       return;
     }
-    
-    // TODO: Encrypt message with crypto service
-    final msg = {
-      'type': 'encrypted_message_send',
-      'ciphertext': content, // Placeholder - should be encrypted
-      'nonce': '',
-      'sender_ephemeral_pk': '',
-      'type': 'text',
-      'timestamp': DateTime.now().millisecondsSinceEpoch,
-      'msg_id': DateTime.now().millisecondsSinceEpoch.toString(),
-    };
-    
-    _send(msg);
+
+    try {
+      final msgId = const Uuid().v4();
+      final ts = DateTime.now().millisecondsSinceEpoch;
+      final result = await _crypto.encryptMessage(
+        content,
+        SessionKeys(
+          messageKey: Uint8List(32)..fillRange(0, 0),
+          authKey: Uint8List(32)..fillRange(0, 0),
+          fileKey: Uint8List(32)..fillRange(0, 0),
+        ),
+        KeyPair(publicKey: Uint8List(32)..fillRange(0, 0), privateKey: Uint8List(32)..fillRange(0, 0)),
+      );
+
+      _send({
+        'type': 'encrypted_message_send',
+        'msg_id': msgId,
+        'timestamp': ts,
+        'room_id': roomId ?? _currentRoomId,
+        'payload': result.toJson(),
+      });
+    } catch (e) {
+      debugPrint('Encrypt message failed: $e');
+    }
   }
-  
-  /// Leave current room
+
   void leaveRoom() {
     if (_currentRoomId != null) {
       _send({'type': 'participant_left'});
       _currentRoomId = null;
     }
   }
-  
-  /// Request room destruction
+
   void destroyRoom() {
     if (_currentRoomId != null) {
       _send({'type': 'room_destroy'});
       _currentRoomId = null;
     }
   }
-  
-  /// Send security event
+
   void sendSecurityEvent(String eventType) {
     _send({
       'type': eventType,
       'timestamp': DateTime.now().millisecondsSinceEpoch,
     });
   }
-  
-  /// Handle incoming WebSocket messages
+
   void _handleMessage(dynamic data) {
     try {
       final json = jsonDecode(data) as Map<String, dynamic>;
       final type = json['type'] as String?;
-      
+
       if (type == null) return;
-      
+
       switch (type) {
         case 'connected':
           _clientId = json['client_id'] as String?;
           _setConnectionState(ConnectionState.connected);
           _reconnectAttempts = 0;
-          
-          // Process queued messages
           _processQueuedMessages();
           break;
-          
+
         case 'room_created':
           _currentRoomId = json['room_id'] as String?;
           onRoomCreated?.call(RoomInfo(
@@ -183,97 +184,127 @@ class WsService extends ChangeNotifier {
             createdAt: DateTime.now(),
           ));
           break;
-          
+
         case 'room_ready':
           _currentRoomId = json['room_id'] as String?;
           break;
-          
+
         case 'participant_joined':
           onPartnerJoined?.call(json['participant_id'] as String? ?? '');
           break;
-          
+
         case 'encrypted_message_receive':
-          final msg = EncryptedMessage.fromJson(json);
-          onMessageReceived?.call(msg);
+          final payload = json['payload'] as Map<String, dynamic>?;
+          if (payload == null) return;
+
+          try {
+            final decrypted = _crypto.decryptMessage(
+              MessageEncryptionResult(
+                ciphertext: payload['ciphertext'] as String? ?? '',
+                nonce: payload['nonce'] as String? ?? '',
+                senderEphemeralPk: payload['sender_ephemeral_pk'] as String? ?? '',
+                msgId: payload['msg_id'] as String? ?? '',
+                timestamp: payload['timestamp'] as int? ?? 0,
+              ),
+              SessionKeys(
+                messageKey: Uint8List(32)..fillRange(0, 0),
+                authKey: Uint8List(32)..fillRange(0, 0),
+                fileKey: Uint8List(32)..fillRange(0, 0),
+              ),
+            );
+
+            final msg = EncryptedMessage(
+              msgId: payload['msg_id'] as String? ?? '',
+              ciphertext: payload['ciphertext'] as String? ?? '',
+              nonce: payload['nonce'] as String? ?? '',
+              senderEphemeralPk: payload['sender_ephemeral_pk'] as String? ?? '',
+              type: _parseMessageType(payload['type'] as String? ?? 'text'),
+              timestamp: payload['timestamp'] as int? ?? 0,
+              status: _parseStatus(json['delivery_status'] as String? ?? 'sent'),
+              isOwn: false,
+              displayContent: decrypted,
+            );
+            onMessageReceived?.call(msg);
+          } catch (e) {
+            debugPrint('Decrypt message failed: $e');
+          }
           break;
-          
+
         case 'message_sent':
-          // Acknowledge to sender
           break;
-          
+
         case 'participant_left':
           onRoomEnded?.call();
           break;
-          
+
         case 'room_destroyed':
           _currentRoomId = null;
           break;
-          
+
         case 'screenshot_detected':
         case 'screen_recording_detected':
         case 'security_warning':
           onSecurityEvent?.call(json['message'] as String? ?? 'Security event');
           break;
-          
+
         case 'file_upload_accepted':
         case 'file_chunk_received':
         case 'file_upload_complete':
-          // File upload handling
           break;
-          
+
         case 'error':
           debugPrint('Server error: ${json['message']}');
           break;
       }
-      
+
       notifyListeners();
     } catch (e) {
       debugPrint('Error handling message: $e');
     }
   }
-  
+
   void _setConnectionState(ConnectionState state) {
     _connectionState = state;
     notifyListeners();
   }
-  
+
   void _scheduleReconnect(String serverUrl) {
     if (_reconnectAttempts >= _maxReconnectAttempts) {
       _setConnectionState(ConnectionState.error);
       return;
     }
-    
+
     _reconnectAttempts++;
     _setConnectionState(ConnectionState.reconnecting);
-    
+
     final delay = Duration(
       seconds: pow(2, _reconnectAttempts).toInt().clamp(1, 30),
     );
-    
+
     _reconnectTimer = Timer(delay, () {
       connect(serverUrl);
     });
   }
-  
+
   void _send(Map<String, dynamic> message) {
     if (_channel?.sink != null && _connectionState == ConnectionState.connected) {
       _channel!.sink.add(jsonEncode(message));
     }
   }
-  
+
   Future<void> _processQueuedMessages() async {
     if (_messageQueue.isEmpty) return;
-    
+
     final queued = List.from(_messageQueue);
     _messageQueue.clear();
-    
+
     for (final msg in queued) {
       _send(msg);
     }
-    
+
     await _storage.clearQueuedMessages();
   }
-  
+
   @override
   void dispose() {
     _reconnectTimer?.cancel();
@@ -282,11 +313,24 @@ class WsService extends ChangeNotifier {
   }
 }
 
-// Simple power function
 int pow(int base, int exp) {
   int result = 1;
   for (int i = 0; i < exp; i++) {
     result *= base;
   }
   return result;
+}
+
+MessageType _parseMessageType(String type) {
+  return MessageType.values.firstWhere(
+    (m) => m.name == type,
+    orElse: () => MessageType.text,
+  );
+}
+
+MessageStatus _parseStatus(String status) {
+  return MessageStatus.values.firstWhere(
+    (m) => m.name == status,
+    orElse: () => MessageStatus.sent,
+  );
 }
