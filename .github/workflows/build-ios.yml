@@ -16,6 +16,9 @@ jobs:
           channel: 'stable'
           cache: true
 
+      - name: Verify Flutter
+        run: flutter --version
+
       - name: Enable iOS support
         run: flutter config --enable-ios
 
@@ -23,13 +26,11 @@ jobs:
         run: |
           cd app
           flutter pub get
-          flutter pub upgrade
 
       - name: Install CocoaPods
         run: |
           cd app/ios
           sudo gem install cocoapods
-          pod repo update
           pod install --repo-update
 
       - name: Build IPA
