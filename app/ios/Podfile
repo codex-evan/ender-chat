@@ -1,4 +1,10 @@
 ﻿# Uncomment this line to define a global platform for your project
 platform :ios, '12.0'
 
-flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+# CocoaPods analytics sends network stats synchronously interfering flutter
+# permissions help
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    flutter_additional_ios_build_settings target
+  end
+end
