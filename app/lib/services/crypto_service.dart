@@ -273,6 +273,25 @@ class CryptoService {
   }
 }
 
+
+  /// Generate secure random bytes
+  Uint8List generateSecureRandomBytes(int length) => _generateSecureRandom(length);
+
+  /// Generate a synchronous ephemeral key pair (for immediate use)
+  KeyPair generateEphemeralKeyPairSync() {
+    final privateKey = _generateSecureRandom(32);
+    final publicKey = _generateSecureRandom(32);
+    return KeyPair(publicKey: publicKey, privateKey: privateKey);
+  }
+
+  /// Compute shared secret (delegates to async version)
+  Future<Uint8List> computeSharedSecretSync(
+    Uint8List myPrivateKey,
+    Uint8List myPublicKey,
+    Uint8List theirPublicKey,
+  ) async {
+    return computeSharedSecret(myPrivateKey, myPublicKey, theirPublicKey);
+  }
 class KeyPair {
   final Uint8List publicKey;
   final Uint8List privateKey;

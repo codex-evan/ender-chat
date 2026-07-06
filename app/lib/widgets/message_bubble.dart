@@ -102,7 +102,7 @@ class MessageBubble extends StatelessWidget {
           style: theme.textTheme.bodyMedium?.copyWith(
             color: message.isOwn ? Colors.white : (isDark ? Colors.white : Colors.black87),
           ),
-          selectionControls: allowCopying ? null : null,
+          
         );
         
       case MessageType.image:

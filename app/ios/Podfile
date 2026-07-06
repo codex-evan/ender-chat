@@ -1,10 +1,16 @@
-﻿# Uncomment this line to define a global platform for your project
+# Uncomment this line to define a global platform for your project
 platform :ios, '12.0'
 
 # CocoaPods analytics sends network stats synchronously interfering flutter
 # permissions help
 post_install do |installer|
   installer.pods_project.targets.each do |target|
-    flutter_additional_ios_build_settings target
+    target.build_configurations.each do |config|
+      config.build_settings['EXCLUDED_ARCHS[Sdk=iphonesimulator*]'] = 'arm64'
+      config.build_settings['EXCLUDED_ARCHS[Sdk=iphoneos*]'] = ''
+      config.build_settings['APPLICATION_EXTENSION_API_ONLY'] = 'NO'
+      # Flutter pods settings
+      flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+    end
   end
 end

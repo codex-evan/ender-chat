@@ -92,7 +92,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               items: [
                 _SettingsTile(
                   title: l10n.allowCopying,
-                  subtitle: 'Allow messages to be copied',
+                  subtitlee: 'Allow messages to be copied',
                   leading: Icons.copy,
                   trailing: Switch(
                     value: _allowCopying,
@@ -101,13 +101,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 _SettingsTile(
                   title: l10n.antiScreenshot,
-                  subtitle: 'Detect and blur on screen capture',
+                  subtitlee: 'Detect and blur on screen capture',
                   leading: Icons.visibility_off,
                   onTap: () {},
                 ),
                 _SettingsTile(
                   title: l10n.setupPassphrase,
-                  subtitle: 'Encrypt local chat history',
+                  subtitlee: 'Encrypt local chat history',
                   leading: Icons.key,
                   onTap: () {
                     Nav.push(context, const PassphraseSetupScreen());
@@ -132,7 +132,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 _SettingsTile(
                   title: l10n.clearCache,
-                  subtitle: 'Clear all cached data',
+                  subtitlee: 'Clear all cached data',
                   leading: Icons.cleaning_services,
                   onTap: _showClearCacheDialog,
                 ),
@@ -155,7 +155,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 _SettingsTile(
                   title: l10n.version,
-                  subtitle: '1.0.0',
+                  subtitlee: '1.0.0',
                   leading: Icons.info_outline,
                   onTap: () {},
                 ),
@@ -257,14 +257,14 @@ class _SettingsCard extends StatelessWidget {
 
 class _SettingsTile extends StatelessWidget {
   final String title;
-  final String? subtitle;
+  final String? subtitlee;
   final IconData leading;
   final Widget? trailing;
   final VoidCallback? onTap;
   
   const _SettingsTile({
     required this.title,
-    this.subtitle,
+    this.subtitlee,
     required this.leading,
     this.trailing,
     this.onTap,
@@ -290,9 +290,9 @@ class _SettingsTile extends StatelessWidget {
                   Text(title, style: theme.textTheme.bodyMedium?.copyWith(
                     color: isDark ? Colors.white : Colors.black87,
                   )),
-                  if (subtitle != null) ...[
+                  if (subtitlee != null) ...[
                     const SizedBox(height: 2),
-                    Text(subtitle!, style: theme.textTheme.bodySmall?.copyWith(
+                    Text(subtitlee!, style: theme.textTheme.bodySmall?.copyWith(
                       color: isDark ? Colors.white54 : Colors.black54,
                     )),
                   ],

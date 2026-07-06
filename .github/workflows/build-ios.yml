@@ -1,4 +1,4 @@
-﻿name: Build iOS IPA
+name: Build iOS IPA
 
 on:
   workflow_dispatch:
@@ -20,19 +20,11 @@ jobs:
         with:
           flutter-version: '3.27.4'
           channel: 'stable'
+          cache: true
 
-      - name: Prepare Flutter project
+      - name: Install dependencies
         run: |
           cd app
-          flutter config --enable-ios --no-analytics
-          flutter precache --ios
-          flutter create \
-            --platforms=ios \
-            --org com.encchat \
-            --project-name enc_chat \
-            /tmp/enc_chat_scaffold
-          rm -rf ios
-          cp -R /tmp/enc_chat_scaffold/ios ios
           flutter pub get
 
       - name: Analyze Dart sources
@@ -40,44 +32,28 @@ jobs:
           cd app
           flutter analyze --no-fatal-warnings --no-fatal-infos
 
-      - name: Validate Xcode project
+      - name: Regenerate iOS project
         run: |
           cd app
-          xcodebuild -list -project ios/Runner.xcodeproj
+          flutter create --platforms=ios .
+
+      - name: Install iOS pods
+        run: |
+          cd app/ios
+          pod install --repo-update
 
       - name: Build IPA
         id: build
-        continue-on-error: true
         run: |
           cd app
-          set +e
-          set -o pipefail
           flutter build ios --release --no-codesign 2>&1 | tee build-ios.log
-          build_status=${PIPESTATUS[0]}
-          echo "exit_code=$build_status" >> "$GITHUB_OUTPUT"
-          if [ "$build_status" -ne 0 ]; then
-            exit 0
-          fi
-          rm -rf build/ios/ipa/Payload
           mkdir -p build/ios/ipa/Payload
           cp -R build/ios/iphoneos/Runner.app build/ios/ipa/Payload/
           cd build/ios/ipa
           zip -qry EncChat-unsigned.ipa Payload
         timeout-minutes: 30
 
-      - name: Report build failure
-        if: steps.build.outputs.exit_code != '0'
-        run: |
-          echo '### iOS build failure' >> "$GITHUB_STEP_SUMMARY"
-          echo '```text' >> "$GITHUB_STEP_SUMMARY"
-          tail -n 120 app/build-ios.log >> "$GITHUB_STEP_SUMMARY"
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
-          details=$(grep -E 'Error \(Xcode\)|Error:|error:' app/build-ios.log | tail -n 8 | tr '\n' ' ')
-          echo "::error title=iOS build failed::$details"
-          exit 1
-
       - name: Upload IPA
-        if: steps.build.outputs.exit_code == '0'
         uses: actions/upload-artifact@v4
         with:
           name: encchat-ios

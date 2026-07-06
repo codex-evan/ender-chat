@@ -1,4 +1,4 @@
-﻿/// WebSocket service for server communication
+/// WebSocket service for server communication
 /// Handles connection, room lifecycle, message sending/receiving
 
 import 'dart:async';
@@ -14,6 +14,36 @@ import '../models/room.dart';
 import 'crypto_service.dart';
 import 'storage_service.dart';
 
+/// Tracks per-room encryption state
+class RoomSession {
+  final String roomId;
+  final Uint8List myEphemeralPrivateKey;
+  final Uint8List myEphemeralPublicKey;
+  final Uint8List? partnerEphemeralPublicKey;
+  final SessionKeys sessionKeys;
+  final Uint8List roomSalt;
+
+  const RoomSession({
+    required this.roomId,
+    required this.myEphemeralPrivateKey,
+    required this.myEphemeralPublicKey,
+    this.partnerEphemeralPublicKey,
+    required this.sessionKeys,
+    required this.roomSalt,
+  });
+
+  RoomSession copyWith({SessionKeys? sessionKeys}) {
+    return RoomSession(
+      roomId: roomId,
+      myEphemeralPrivateKey: myEphemeralPrivateKey,
+      myEphemeralPublicKey: myEphemeralPublicKey,
+      partnerEphemeralPublicKey: partnerEphemeralPublicKey,
+      sessionKeys: sessionKeys ?? this.sessionKeys,
+      roomSalt: roomSalt,
+    );
+  }
+}
+
 class WsService extends ChangeNotifier {
   final CryptoService _crypto;
   final StorageService _storage;
@@ -22,6 +52,9 @@ class WsService extends ChangeNotifier {
   String? _clientId;
   String? _currentRoomId;
   ConnectionState _connectionState = ConnectionState.disconnected;
+
+  // Per-room session tracking
+  final Map<String, RoomSession> _roomSessions = {};
 
   // Callbacks
   Function(RoomInfo)? onRoomCreated;
@@ -49,7 +82,14 @@ class WsService extends ChangeNotifier {
   String? get currentRoomId => _currentRoomId;
 
   Future<void> init() async {
-    _messageQueue.addAll(await _storage.getQueuedMessages());
+    final queuedStrings = await _storage.getQueuedMessages();
+    for (final s in queuedStrings) {
+      try {
+        _messageQueue.add(jsonDecode(s) as Map<String, dynamic>);
+      } on Object {
+        // Skip malformed entries
+      }
+    }
     notifyListeners();
   }
 
@@ -68,7 +108,7 @@ class WsService extends ChangeNotifier {
       _channel!.stream.listen(
         _handleMessage,
         onError: (error) {
-          debugPrint('WebSocket error: $error');
+          debugPrint('WebSocket error: ');
           _setConnectionState(ConnectionState.error);
           _scheduleReconnect(serverUrl);
         },
@@ -80,7 +120,7 @@ class WsService extends ChangeNotifier {
         },
       );
     } catch (e) {
-      debugPrint('WebSocket connection failed: $e');
+      debugPrint('WebSocket connection failed: ');
       _setConnectionState(ConnectionState.error);
       _scheduleReconnect(serverUrl);
     }
@@ -92,6 +132,7 @@ class WsService extends ChangeNotifier {
     _channel = null;
     _setConnectionState(ConnectionState.disconnected);
     _currentRoomId = null;
+    _roomSessions.clear();
   }
 
   void createRoom() {
@@ -100,6 +141,36 @@ class WsService extends ChangeNotifier {
 
   void joinRoom(String roomId) {
     _send({'type': 'join_room', 'room_id': roomId, 'timestamp': DateTime.now().millisecondsSinceEpoch});
+  }
+
+  RoomSession _createRoomSession(String roomId) {
+    final roomSalt = _crypto.generateSecureRandomBytes(16);
+    final myPrivKey = _crypto.generateSecureRandomBytes(32);
+    final myPubKey = _crypto.generateSecureRandomBytes(32);
+    return RoomSession(
+      roomId: roomId,
+      myEphemeralPrivateKey: myPrivKey,
+      myEphemeralPublicKey: myPubKey,
+      sessionKeys: SessionKeys(
+        messageKey: Uint8List(32),
+        authKey: Uint8List(32),
+        fileKey: Uint8List(32),
+      ),
+      roomSalt: roomSalt,
+    );
+  }
+
+  Future<void> _deriveSessionKeys(String roomId, RoomSession session) async {
+    if (session.partnerEphemeralPublicKey == null) return;
+
+    final sharedSecret = await _crypto.computeSharedSecret(
+      session.myEphemeralPrivateKey,
+      session.myEphemeralPublicKey,
+      session.partnerEphemeralPublicKey!,
+    );
+
+    final derivedKeys = await _crypto.deriveSessionKeys(sharedSecret, session.roomSalt);
+    _roomSessions[roomId] = session.copyWith(sessionKeys: derivedKeys);
   }
 
   Future<void> sendMessage(String content, {String? roomId}) async {
@@ -113,34 +184,44 @@ class WsService extends ChangeNotifier {
       return;
     }
 
+    final targetRoomId = roomId ?? _currentRoomId;
+    if (targetRoomId == null) {
+      debugPrint('No room to send message to');
+      return;
+    }
+
     try {
       final msgId = const Uuid().v4();
       final ts = DateTime.now().millisecondsSinceEpoch;
+
+      RoomSession? session = _roomSessions[targetRoomId];
+      if (session == null) {
+        session = _createRoomSession(targetRoomId);
+        _roomSessions[targetRoomId] = session;
+      }
+
       final result = await _crypto.encryptMessage(
         content,
-        SessionKeys(
-          messageKey: Uint8List(32)..fillRange(0, 0),
-          authKey: Uint8List(32)..fillRange(0, 0),
-          fileKey: Uint8List(32)..fillRange(0, 0),
-        ),
-        KeyPair(publicKey: Uint8List(32)..fillRange(0, 0), privateKey: Uint8List(32)..fillRange(0, 0)),
+        session.sessionKeys,
+        KeyPair(publicKey: session.myEphemeralPublicKey, privateKey: session.myEphemeralPrivateKey),
       );
 
       _send({
         'type': 'encrypted_message_send',
         'msg_id': msgId,
         'timestamp': ts,
-        'room_id': roomId ?? _currentRoomId,
+        'room_id': targetRoomId,
         'payload': result.toJson(),
       });
     } catch (e) {
-      debugPrint('Encrypt message failed: $e');
+      debugPrint('Encrypt message failed: ');
     }
   }
 
   void leaveRoom() {
     if (_currentRoomId != null) {
       _send({'type': 'participant_left'});
+      _roomSessions.remove(_currentRoomId);
       _currentRoomId = null;
     }
   }
@@ -148,6 +229,7 @@ class WsService extends ChangeNotifier {
   void destroyRoom() {
     if (_currentRoomId != null) {
       _send({'type': 'room_destroy'});
+      _roomSessions.remove(_currentRoomId);
       _currentRoomId = null;
     }
   }
@@ -159,7 +241,7 @@ class WsService extends ChangeNotifier {
     });
   }
 
-  void _handleMessage(dynamic data) {
+  Future<void> _handleMessage(dynamic data) async {
     try {
       final json = jsonDecode(data) as Map<String, dynamic>;
       final type = json['type'] as String?;
@@ -176,6 +258,9 @@ class WsService extends ChangeNotifier {
 
         case 'room_created':
           _currentRoomId = json['room_id'] as String?;
+          if (_currentRoomId != null) {
+            _roomSessions[_currentRoomId!] = _createRoomSession(_currentRoomId!);
+          }
           onRoomCreated?.call(RoomInfo(
             roomId: json['room_id'] ?? '',
             roomCode: json['room_code'] ?? '',
@@ -193,40 +278,68 @@ class WsService extends ChangeNotifier {
           onPartnerJoined?.call(json['participant_id'] as String? ?? '');
           break;
 
+        case 'partner_public_key':
+          if (_currentRoomId != null) {
+            final pkBase64 = json['public_key'] as String?;
+            if (pkBase64 != null && pkBase64.isNotEmpty) {
+              final partnerPk = base64Decode(pkBase64);
+              if (partnerPk.length == 32) {
+                final existingSession = _roomSessions[_currentRoomId!];
+                if (existingSession != null) {
+                  final updatedSession = RoomSession(
+                    roomId: existingSession.roomId,
+                    myEphemeralPrivateKey: existingSession.myEphemeralPrivateKey,
+                    myEphemeralPublicKey: existingSession.myEphemeralPublicKey,
+                    partnerEphemeralPublicKey: Uint8List.fromList(partnerPk),
+                    sessionKeys: existingSession.sessionKeys,
+                    roomSalt: existingSession.roomSalt,
+                  );
+                  _roomSessions[_currentRoomId!] = updatedSession;
+                  await _deriveSessionKeys(_currentRoomId!, updatedSession);
+                }
+              }
+            }
+          }
+          break;
+
         case 'encrypted_message_receive':
           final payload = json['payload'] as Map<String, dynamic>?;
           if (payload == null) return;
 
           try {
-            final decrypted = _crypto.decryptMessage(
-              MessageEncryptionResult(
-                ciphertext: payload['ciphertext'] as String? ?? '',
-                nonce: payload['nonce'] as String? ?? '',
-                senderEphemeralPk: payload['sender_ephemeral_pk'] as String? ?? '',
-                msgId: payload['msg_id'] as String? ?? '',
-                timestamp: payload['timestamp'] as int? ?? 0,
-              ),
-              SessionKeys(
-                messageKey: Uint8List(32)..fillRange(0, 0),
-                authKey: Uint8List(32)..fillRange(0, 0),
-                fileKey: Uint8List(32)..fillRange(0, 0),
-              ),
-            );
-
-            final msg = EncryptedMessage(
-              msgId: payload['msg_id'] as String? ?? '',
+            final msgResult = MessageEncryptionResult(
               ciphertext: payload['ciphertext'] as String? ?? '',
               nonce: payload['nonce'] as String? ?? '',
               senderEphemeralPk: payload['sender_ephemeral_pk'] as String? ?? '',
-              type: _parseMessageType(payload['type'] as String? ?? 'text'),
+              msgId: payload['msg_id'] as String? ?? '',
               timestamp: payload['timestamp'] as int? ?? 0,
+            );
+
+            String? decryptedContent;
+            if (_currentRoomId != null) {
+              final session = _roomSessions[_currentRoomId!];
+              if (session != null) {
+                decryptedContent = await _crypto.decryptMessage(
+                  msgResult,
+                  session.sessionKeys,
+                );
+              }
+            }
+
+            final msg = EncryptedMessage(
+              msgId: msgResult.msgId,
+              ciphertext: msgResult.ciphertext,
+              nonce: msgResult.nonce,
+              senderEphemeralPk: msgResult.senderEphemeralPk,
+              type: _parseMessageType(payload['type'] as String? ?? 'text'),
+              timestamp: msgResult.timestamp,
               status: _parseStatus(json['delivery_status'] as String? ?? 'sent'),
               isOwn: false,
-              displayContent: decrypted,
+              displayContent: decryptedContent,
             );
             onMessageReceived?.call(msg);
           } catch (e) {
-            debugPrint('Decrypt message failed: $e');
+            debugPrint('Decrypt message failed: ');
           }
           break;
 
@@ -239,6 +352,7 @@ class WsService extends ChangeNotifier {
 
         case 'room_destroyed':
           _currentRoomId = null;
+          _roomSessions.clear();
           break;
 
         case 'screenshot_detected':
@@ -253,13 +367,13 @@ class WsService extends ChangeNotifier {
           break;
 
         case 'error':
-          debugPrint('Server error: ${json['message']}');
+          debugPrint('Server error: ');
           break;
       }
 
       notifyListeners();
     } catch (e) {
-      debugPrint('Error handling message: $e');
+      debugPrint('Error handling message: ');
     }
   }
 
@@ -277,13 +391,19 @@ class WsService extends ChangeNotifier {
     _reconnectAttempts++;
     _setConnectionState(ConnectionState.reconnecting);
 
-    final delay = Duration(
-      seconds: pow(2, _reconnectAttempts).toInt().clamp(1, 30),
-    );
+    final delay = Duration(seconds: _exponentialBackoff(_reconnectAttempts));
 
     _reconnectTimer = Timer(delay, () {
       connect(serverUrl);
     });
+  }
+
+  int _exponentialBackoff(int attempt) {
+    int result = 1;
+    for (int i = 0; i < attempt; i++) {
+      result *= 2;
+    }
+    return result.clamp(1, 30);
   }
 
   void _send(Map<String, dynamic> message) {
@@ -311,14 +431,6 @@ class WsService extends ChangeNotifier {
     disconnect();
     super.dispose();
   }
-}
-
-int pow(int base, int exp) {
-  int result = 1;
-  for (int i = 0; i < exp; i++) {
-    result *= base;
-  }
-  return result;
 }
 
 MessageType _parseMessageType(String type) {

@@ -149,11 +149,11 @@ class StorageService {
   }
   
   /// Get queued messages
-  Future<List<Map<String, dynamic>>> getQueuedMessages() async {
+  Future<List<String>> getQueuedMessages() async {
     if (_db == null) return [];
     
     final rows = await _db!.query('message_queue');
-    return rows.map((row) => row['message_data'] as Map<String, dynamic>).toList();
+    return [for (final row in rows) row['message_data'] as String];
   }
   
   /// Clear queued messages
