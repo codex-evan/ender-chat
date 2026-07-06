@@ -46,9 +46,18 @@ jobs:
           xcodebuild -list -project ios/Runner.xcodeproj
 
       - name: Build IPA
+        id: build
+        continue-on-error: true
         run: |
           cd app
-          flutter build ios --release --no-codesign
+          set +e
+          set -o pipefail
+          flutter build ios --release --no-codesign 2>&1 | tee build-ios.log
+          build_status=${PIPESTATUS[0]}
+          echo "exit_code=$build_status" >> "$GITHUB_OUTPUT"
+          if [ "$build_status" -ne 0 ]; then
+            exit 0
+          fi
           rm -rf build/ios/ipa/Payload
           mkdir -p build/ios/ipa/Payload
           cp -R build/ios/iphoneos/Runner.app build/ios/ipa/Payload/
@@ -56,7 +65,19 @@ jobs:
           zip -qry EncChat-unsigned.ipa Payload
         timeout-minutes: 30
 
+      - name: Report build failure
+        if: steps.build.outputs.exit_code != '0'
+        run: |
+          echo '### iOS build failure' >> "$GITHUB_STEP_SUMMARY"
+          echo '```text' >> "$GITHUB_STEP_SUMMARY"
+          tail -n 120 app/build-ios.log >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          details=$(grep -E 'Error \(Xcode\)|Error:|error:' app/build-ios.log | tail -n 8 | tr '\n' ' ')
+          echo "::error title=iOS build failed::$details"
+          exit 1
+
       - name: Upload IPA
+        if: steps.build.outputs.exit_code == '0'
         uses: actions/upload-artifact@v4
         with:
           name: encchat-ios
