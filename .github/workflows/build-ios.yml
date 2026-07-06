@@ -32,10 +32,25 @@ jobs:
           cd app
           flutter analyze --no-fatal-warnings --no-fatal-infos
 
-      - name: Regenerate iOS project
+      - name: Regenerate iOS project and fix Podfile
         run: |
           cd app
           flutter create --platforms=ios .
+          cat > ios/Podfile << 'PODFILE'
+          # Uncomment this line to define a global platform for your project
+          platform :ios, '12.0'
+
+          post_install do |installer|
+            installer.pods_project.targets.each do |target|
+              target.build_configurations.each do |config|
+                config.build_settings['EXCLUDED_ARCHS[Sdk=iphonesimulator*]'] = 'arm64'
+                config.build_settings['EXCLUDED_ARCHS[Sdk=iphoneos*]'] = ''
+                config.build_settings['APPLICATION_EXTENSION_API_ONLY'] = 'NO'
+                flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+              end
+            end
+          end
+          PODFILE
 
       - name: Install iOS pods
         run: |
