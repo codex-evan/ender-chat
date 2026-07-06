@@ -1,28 +1,31 @@
-﻿# EncChat - Root .gitignore
-## Server
+﻿# Dependencies
+app/node_modules/
 server/node_modules/
-server/dist/
-server/.env
-server/uploads/**
-!server/uploads/.gitkeep
 
-# Flutter
-app/.dart_tool/
+# Build outputs
 app/build/
+app/.dart_tool/
 app/.packages
-app/.metadata
 app/ios/.symlinks/
 app/ios/Flutter/Generated.xcconfig
 app/ios/Flutter/flutter_export_environment.sh
 app/ios/Runner/GeneratedPluginRegistrant.*
 app/android/*.aab
 app/android/*.apk
-app/android/*.apks
 app/android/local.properties
 app/android/.gradle/
-app/android/build/
 app/windows/flutter/ephemeral/
 app/linux/flutter/ephemeral/
+
+# Server build
+server/dist/
+server/.env
+server/uploads/*
+!server/uploads/.gitkeep
+
+# OS
+.DS_Store
+Thumbs.db
 
 # IDE
 .idea/
@@ -31,13 +34,19 @@ app/linux/flutter/ephemeral/
 *.swo
 *~
 
-# OS
-.DS_Store
-Thumbs.db
-
 # Logs
 *.log
 logs/
 
-# Docs
-docs/*.pdf
+# Old backups
+*.bak
+_build_complete.py
+app.js
+index.html
+styles.css
+murmur-chat-*
+deploy.sh
+admin.html
+node_modules/
+package-lock.json
+server.js
