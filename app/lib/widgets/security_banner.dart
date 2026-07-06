@@ -1,7 +1,7 @@
 ﻿/// Security warning banner widget
 
 import 'package:flutter/material.dart';
-import '../../main/app_theme.dart';
+import '../main/app_theme.dart';
 
 class SecurityBanner extends StatefulWidget {
   final String message;

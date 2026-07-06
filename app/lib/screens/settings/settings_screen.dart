@@ -5,7 +5,7 @@ import '../../i18n/app_localizations.dart';
 import '../../main/app_theme.dart';
 import '../../main/app_router.dart';
 import 'privacy_screen.dart';
-import 'local_records/local_records_screen.dart';
+import '../local_records/local_records_screen.dart';
 import 'passphrase_setup_screen.dart';
 
 class SettingsScreen extends StatefulWidget {

@@ -2,8 +2,8 @@
 import 'package:flutter/widgets.dart';
 import 'app_localizations.dart';
 
-class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
-  const _AppLocalizationsDelegate();
+class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
+  const AppLocalizationsDelegate();
   
   @override
   Future<AppLocalizations> load(Locale locale) {
@@ -20,7 +20,7 @@ class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> 
   bool isSupported(Locale locale) => ['en', 'zh'].contains(locale.languageCode);
   
   @override
-  bool shouldReload(_AppLocalizationsDelegate old) => false;
+  bool shouldReload(AppLocalizationsDelegate old) => false;
 }
 
 class _AppLocalizationsZh extends AppLocalizations {

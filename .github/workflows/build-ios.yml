@@ -29,6 +29,11 @@ jobs:
           cp -R /tmp/enc_chat_scaffold/ios ios
           flutter pub get
 
+      - name: Analyze Dart sources
+        run: |
+          cd app
+          flutter analyze --no-fatal-warnings --no-fatal-infos
+
       - name: Validate Xcode project
         run: |
           cd app

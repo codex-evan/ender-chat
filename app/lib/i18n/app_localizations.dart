@@ -1,12 +1,18 @@
 ﻿/// Internationalization support
 /// All strings defined here for easy future expansion
 
-abstract class AppLocalizations {
+import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
+
+import 'app_localizations_zh.dart';
+
+class AppLocalizations {
   static AppLocalizations? of(BuildContext context) {
     return Localizations.of<AppLocalizations>(context, AppLocalizations)!;
   }
   
-  static const.delegate = _AppLocalizationsDelegate();
+  static const LocalizationsDelegate<AppLocalizations> delegate =
+      AppLocalizationsDelegate();
   
   // App
   String get appName => 'EncChat';

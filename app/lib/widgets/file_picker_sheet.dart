@@ -1,8 +1,8 @@
 ﻿/// File attachment picker with encryption progress
 
 import 'package:flutter/material.dart';
-import '../../i18n/app_localizations.dart';
-import '../../main/app_theme.dart';
+import '../i18n/app_localizations.dart';
+import '../main/app_theme.dart';
 
 class FilePickerSheet extends StatelessWidget {
   final Function(String type, String path) onSelect;

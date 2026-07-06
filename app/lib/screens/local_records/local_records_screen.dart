@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import '../../i18n/app_localizations.dart';
 import '../../main/app_router.dart';
-import 'passphrase_unlock_screen.dart';
+import '../settings/passphrase_unlock_screen.dart';
 
 class LocalRecordsScreen extends StatelessWidget {
   const LocalRecordsScreen({super.key});

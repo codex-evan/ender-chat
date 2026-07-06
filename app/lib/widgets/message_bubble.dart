@@ -1,8 +1,8 @@
 ﻿/// Message bubble widget
 
 import 'package:flutter/material.dart';
-import '../../main/app_theme.dart';
-import '../../models/message.dart';
+import '../main/app_theme.dart';
+import '../models/message.dart';
 import 'package:intl/intl.dart';
 
 class MessageBubble extends StatelessWidget {
